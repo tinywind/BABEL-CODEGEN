@@ -107,6 +107,7 @@ public class JsxCodegen {
             final Unmarshaller unmarshaller = ctx.createUnmarshaller();
             unmarshaller.setSchema(sf.newSchema(JsxCodegen.class.getResource("/xsd/" + JSX_CODEGEN_XSD)));
             unmarshaller.setEventHandler(event -> true);
+            System.out.println(xml);
             return (Configuration) unmarshaller.unmarshal(new StringReader(xml));
         } catch (Exception e) {
             throw new RuntimeException(e);

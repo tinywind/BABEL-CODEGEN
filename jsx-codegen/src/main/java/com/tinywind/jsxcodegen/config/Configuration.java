@@ -23,19 +23,21 @@
  */
 package com.tinywind.jsxcodegen.config;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author tinywind
  */
-@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "configuration")
 public class Configuration {
+    @XmlElementWrapper(name = "sources")
+    @XmlElement(name = "source")
     private List<Source> sources;
 
+    @XmlElement
     private Jsx jsx;
 
     public List<Source> getSources() {
@@ -45,8 +47,6 @@ public class Configuration {
         return sources;
     }
 
-    @XmlElementWrapper(name = "sources")
-    @XmlElement(name = "source")
     public void setSources(List<Source> sources) {
         this.sources = sources;
     }
@@ -55,7 +55,6 @@ public class Configuration {
         return jsx;
     }
 
-    @XmlElement
     public void setJsx(Jsx jsx) {
         this.jsx = jsx;
     }

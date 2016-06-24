@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<configuration xmlns="https://raw.githubusercontent.com/tinywind/JSX-CODEGEN/master/jsx-codegen/src/main/resources/xsd/jsx-codegen-0.1.xsd">
+<sources>
+    <sources>
+        <sourceDir></sourceDir>
+        <targetDir></targetDir>
+    </sources>
+</sources>
+    <jsx>
+        <jsx></jsx>
+    </jsx>
+</configuration>

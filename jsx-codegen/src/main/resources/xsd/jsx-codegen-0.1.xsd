@@ -7,7 +7,7 @@
     <element name="configuration">
         <complexType>
             <all>
-                <element name="sources" type="tns:Sources" minOccurs="1" maxOccurs="1"/>
+                <element name="sources" type="tns:Sources"/>
                 <element name="jsx" type="tns:Jsx" minOccurs="0" maxOccurs="1"/>
             </all>
         </complexType>
@@ -15,17 +15,17 @@
 
     <complexType name="Sources">
         <sequence>
-            <element name="source" type="tns:Source" minOccurs="1" maxOccurs="unbounded"/>
+            <element name="sources" type="tns:Source" minOccurs="1" maxOccurs="unbounded"/>
         </sequence>
     </complexType>
 
     <complexType name="Source">
         <all>
             <element name="sourceDir" type="string"/>
-            <element name="sourceEncoding" type="string" default="UTF-8"/>
+            <element name="sourceEncoding" type="string" default="UTF-8" minOccurs="0"/>
             <element name="targetDir" type="string"/>
-            <element name="targetEncoding" type="string" default="UTF-8"/>
-            <element name="overwrite" type="boolean" default="true"/>
+            <element name="targetEncoding" type="string" default="UTF-8" minOccurs="0"/>
+            <element name="overwrite" type="boolean" default="true" minOccurs="0"/>
             <element name="excludes" type="string" default="" minOccurs="0"/>
         </all>
     </complexType>
