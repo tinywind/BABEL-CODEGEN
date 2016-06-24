@@ -23,7 +23,7 @@
  */
 package com.tinywind.jsxcodegen;
 
-import com.tinywind.jsxcodegen.config.Configuration;
+import com.tinywind.jsxcodegen.jaxb.Configuration;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;

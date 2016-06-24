@@ -34,7 +34,7 @@
         <all>
             <element name="presets" type="tns:JsxPresets" minOccurs="0"/>
             <!-- If presets, ignore. -->
-            <element name="jsx" type="string" default="React.createElement"/>
+            <element name="jsx" type="string" default="React.createElement" minOccurs="0"/>
         </all>
     </complexType>
 
