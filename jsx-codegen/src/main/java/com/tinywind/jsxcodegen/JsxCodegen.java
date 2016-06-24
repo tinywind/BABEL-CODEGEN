@@ -23,15 +23,24 @@
  */
 package com.tinywind.jsxcodegen;
 
+import com.tinywind.jsxcodegen.config.Configuration;
+
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import java.io.InputStreamReader;
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.SchemaFactory;
+import java.io.*;
 
 /**
  * @author tinywind
  */
 public class JsxCodegen {
+    public final static String JSX_CODEGEN_XSD = "jsx-codegen-0.1.xsd";
+    public final static String REPO_XSD_URL = "https://raw.githubusercontent.com/tinywind/JSX-CODEGEN/master/jsx-codegen/src/main/resources/xsd/";
+    public final static String REPO_JSX_CODEGEN_XSD = REPO_XSD_URL + JSX_CODEGEN_XSD;
     private final ScriptEngine engine;
 
     public JsxCodegen() throws ScriptException {
@@ -40,6 +49,67 @@ public class JsxCodegen {
     }
 
     public static void main(String[] args) {
-        System.out.println("Hello world");
+        if (args.length < 1) {
+            System.err.println("Usage : JsxCodegen <configuration-file>");
+            System.exit(-1);
+        }
+
+        for (String arg : args) {
+            InputStream in = JsxCodegen.class.getResourceAsStream(arg);
+            try {
+                if (in == null && !arg.startsWith("/"))
+                    in = JsxCodegen.class.getResourceAsStream("/" + arg);
+
+                if (in == null && new File(arg).exists())
+                    in = new FileInputStream(new File(arg));
+
+                if (in == null) {
+                    System.err.println("Cannot find " + arg + " on classpath, or in directory " + new File(".").getCanonicalPath());
+                    System.err.println("-----------");
+                    System.err.println("Please be sure it is located");
+                    System.err.println("  - on the classpath and qualified as a classpath location.");
+                    System.err.println("  - in the local directory or at a global path in the file system.");
+                    continue;
+                }
+
+                System.out.println("Initialising properties: " + arg);
+
+                final Configuration configuration = load(in);
+                System.out.println(configuration);
+//                generate(configuration);
+            } catch (Exception e) {
+                System.err.println("Cannot read " + arg + ". Error : " + e.getMessage());
+                e.printStackTrace();
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        }
+    }
+
+    public static Configuration load(InputStream in) throws IOException {
+        final byte[] buffer = new byte[1000 * 1000];
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (int len; (len = in.read(buffer)) >= 0; )
+            out.write(buffer, 0, len);
+
+        final String xml = out.toString()
+                .replaceAll("<(\\w+:)?configuration\\s+xmlns(:\\w+)?=\"[^\"]*\"[^>]*>", "<$1configuration xmlns$2=\"" + REPO_JSX_CODEGEN_XSD + "\">")
+                .replace("<configuration>", "<configuration xmlns=\"" + REPO_JSX_CODEGEN_XSD + "\">");
+
+        try {
+            final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            final JAXBContext ctx = JAXBContext.newInstance(Configuration.class);
+            final Unmarshaller unmarshaller = ctx.createUnmarshaller();
+            unmarshaller.setSchema(sf.newSchema(JsxCodegen.class.getResource("/xsd/" + JSX_CODEGEN_XSD)));
+            unmarshaller.setEventHandler(event -> true);
+            return (Configuration) unmarshaller.unmarshal(new StringReader(xml));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
