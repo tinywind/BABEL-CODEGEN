@@ -21,10 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.tinywind.jsxcodegen;
+package com.tinywind.babelcodegen;
 
-import com.tinywind.jsxcodegen.jaxb.Configuration;
+import com.tinywind.babelcodegen.jaxb.BabelOptions;
+import com.tinywind.babelcodegen.jaxb.Configuration;
+import com.tinywind.babelcodegen.jaxb.Source;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -33,32 +37,37 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.SchemaFactory;
 import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * @author tinywind
  */
-public class JsxCodegen {
-    public final static String JSX_CODEGEN_XSD = "jsx-codegen-0.1.xsd";
-    public final static String REPO_XSD_URL = "https://raw.githubusercontent.com/tinywind/JSX-CODEGEN/master/jsx-codegen/src/main/resources/xsd/";
-    public final static String REPO_JSX_CODEGEN_XSD = REPO_XSD_URL + JSX_CODEGEN_XSD;
+public class BabelCodegen {
+    public final static String BABEL_CODEGEN_XSD = "babel-codegen-0.1.xsd";
+    public final static String REPO_XSD_URL = "https://raw.githubusercontent.com/tinywind/BABEL-CODEGEN/master/babel-codegen/src/main/resources/xsd/";
+    public final static String REPO_BABEL_CODEGEN_XSD = REPO_XSD_URL + BABEL_CODEGEN_XSD;
     private final ScriptEngine engine;
+    private final Invocable invocable;
 
-    public JsxCodegen() throws ScriptException {
+    public BabelCodegen() throws ScriptException {
         engine = new ScriptEngineManager().getEngineByName("nashorn");
         engine.eval(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("/asset/babel.min.js")));
+        invocable = (Invocable) engine;
     }
 
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("Usage : JsxCodegen <configuration-file>");
+            System.err.println("Usage : BabelCodegen <configuration-file>");
             System.exit(-1);
         }
 
         for (String arg : args) {
-            InputStream in = JsxCodegen.class.getResourceAsStream(arg);
+            InputStream in = BabelCodegen.class.getResourceAsStream(arg);
             try {
                 if (in == null && !arg.startsWith("/"))
-                    in = JsxCodegen.class.getResourceAsStream("/" + arg);
+                    in = BabelCodegen.class.getResourceAsStream("/" + arg);
 
                 if (in == null && new File(arg).exists())
                     in = new FileInputStream(new File(arg));
@@ -75,8 +84,7 @@ public class JsxCodegen {
                 System.out.println("Initialising properties: " + arg);
 
                 final Configuration configuration = load(in);
-                System.out.println(configuration);
-//                generate(configuration);
+                new BabelCodegen().generate(configuration);
             } catch (Exception e) {
                 System.err.println("Cannot read " + arg + ". Error : " + e.getMessage());
                 e.printStackTrace();
@@ -98,19 +106,63 @@ public class JsxCodegen {
             out.write(buffer, 0, len);
 
         final String xml = out.toString()
-                .replaceAll("<(\\w+:)?configuration\\s+xmlns(:\\w+)?=\"[^\"]*\"[^>]*>", "<$1configuration xmlns$2=\"" + REPO_JSX_CODEGEN_XSD + "\">")
-                .replace("<configuration>", "<configuration xmlns=\"" + REPO_JSX_CODEGEN_XSD + "\">");
+                .replaceAll("<(\\w+:)?configuration\\s+xmlns(:\\w+)?=\"[^\"]*\"[^>]*>", "<$1configuration xmlns$2=\"" + REPO_BABEL_CODEGEN_XSD + "\">")
+                .replace("<configuration>", "<configuration xmlns=\"" + REPO_BABEL_CODEGEN_XSD + "\">");
 
         try {
             final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             final JAXBContext ctx = JAXBContext.newInstance(Configuration.class);
             final Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            unmarshaller.setSchema(sf.newSchema(JsxCodegen.class.getResource("/xsd/" + JSX_CODEGEN_XSD)));
+            unmarshaller.setSchema(sf.newSchema(BabelCodegen.class.getResource("/xsd/" + BABEL_CODEGEN_XSD)));
             unmarshaller.setEventHandler(event -> true);
-            System.out.println(xml);
             return (Configuration) unmarshaller.unmarshal(new StringReader(xml));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void generate(File sourceDir, String subDir, Source source, BabelOptions babelOptions) {
+        final File[] childFiles = sourceDir.listFiles();
+        if (childFiles == null)
+            return;
+
+        final String dir = source.getTargetDir();
+        final File targetDir = new File(dir
+                + (dir.length() > 0 && dir.length() - 1 != dir.lastIndexOf(File.separatorChar) ? File.separatorChar : "")
+                + sourceDir.getName());
+        if (!targetDir.mkdirs() && !targetDir.isDirectory()) {
+            System.err.println(targetDir.getAbsolutePath() + " is not directory.");
+            return;
+        }
+
+        for (File file : childFiles) {
+            if (file.isDirectory()) {
+                generate(file, subDir + File.separatorChar + sourceDir.getName(), source, babelOptions);
+                continue;
+            }
+
+            final String fileName = file.getName();
+            final String postfix = source.getSourceFilePostfix();
+            if (fileName.length() <= postfix.length() || fileName.lastIndexOf(postfix) != fileName.length() - postfix.length())
+                continue;
+
+            final File targetFile = new File(targetDir, fileName.substring(0, fileName.lastIndexOf(postfix)) + ".js");
+            if (targetFile.exists())
+                if (!source.isOverwrite() || targetFile.isDirectory())
+                    continue;
+
+            try {
+                final String originCode = new String(Files.readAllBytes(Paths.get(file.toURI())), source.getSourceEncoding());
+                final ScriptObjectMirror babelResultMirror = (ScriptObjectMirror) invocable.invokeFunction("transform", originCode, babelOptions.getPresets(), babelOptions.isMinified());
+                final String transformCode = (String) babelResultMirror.getMember("code");
+                Files.write(Paths.get(targetFile.toURI()), transformCode.getBytes(source.getTargetEncoding()));
+            } catch (IOException | NoSuchMethodException | ScriptException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void generate(Configuration configuration) {
+        configuration.getSources().forEach(source -> generate(new File(source.getSourceDir()), "", source, configuration.getBabelOptions()));
     }
 }

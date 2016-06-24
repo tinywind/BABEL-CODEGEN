@@ -5,48 +5,48 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.tinywind</groupId>
-    <artifactId>jsx-codegen-parent</artifactId>
+    <artifactId>babel-codegen-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>JSX-CODEGEN Parent</name>
+    <name>BABEL-CODEGEN Parent</name>
 
     <description>
-        transform JSX file into JS file
+        transform BABEL file into JS file
     </description>
 
-    <url>https://github.com/tinywind/JSX-CODEGEN</url>
+    <url>https://github.com/tinywind/BABEL-CODEGEN</url>
 
     <licenses>
         <license>
             <name>The MIT License (MIT)</name>
-            <url>https://raw.githubusercontent.com/tinywind/JSX-CODEGEN/master/LICENSE.txt</url>
+            <url>https://raw.githubusercontent.com/tinywind/BABEL-CODEGEN/master/LICENSE.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
 
     <scm>
-        <developerConnection>https://github.com/tinywind/JSX-CODEGEN.git</developerConnection>
-        <url>https://github.com/tinywind/JSX-CODEGEN.git</url>
-        <connection>git://github.com/tinywind/JSX-CODEGEN.git</connection>
+        <developerConnection>https://github.com/tinywind/BABEL-CODEGEN.git</developerConnection>
+        <url>https://github.com/tinywind/BABEL-CODEGEN.git</url>
+        <connection>git://github.com/tinywind/BABEL-CODEGEN.git</connection>
     </scm>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/tinywind/JSX-CODEGEN/issues</url>
+        <url>https://github.com/tinywind/BABEL-CODEGEN/issues</url>
     </issueManagement>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.tinywind</groupId>
-                <artifactId>jsx-codegen</artifactId>
+                <artifactId>babel-codegen</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.tinywind</groupId>
-                <artifactId>jsx-codegen-maven</artifactId>
+                <artifactId>babel-codegen-maven</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
@@ -103,8 +103,8 @@
     </build>
 
     <modules>
-        <module>jsx-codegen</module>
-        <module>jsx-codegen-maven</module>
+        <module>babel-codegen</module>
+        <module>babel-codegen-maven</module>
     </modules>
 
     <profiles>

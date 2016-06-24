@@ -5,19 +5,19 @@
 
     <parent>
         <groupId>com.tinywind</groupId>
-        <artifactId>jsx-codegen-parent</artifactId>
+        <artifactId>babel-codegen-parent</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jsx-codegen-maven</artifactId>
-    <name>JSX-CODEGEN Maven</name>
+    <artifactId>babel-codegen-maven</artifactId>
+    <name>BABEL-CODEGEN Maven</name>
 
     <packaging>maven-plugin</packaging>
 
     <licenses>
         <license>
             <name>The MIT License (MIT)</name>
-            <url>https://raw.githubusercontent.com/tinywind/JSX-CODEGEN/master/LICENSE.txt</url>
+            <url>https://raw.githubusercontent.com/tinywind/BABEL-CODEGEN/master/LICENSE.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -52,7 +52,7 @@
     <dependencies>
         <dependency>
             <groupId>com.tinywind</groupId>
-            <artifactId>jsx-codegen</artifactId>
+            <artifactId>babel-codegen</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

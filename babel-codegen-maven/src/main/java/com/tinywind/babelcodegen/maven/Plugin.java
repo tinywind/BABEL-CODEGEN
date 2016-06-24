@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.tinywind.jsxcodegen.maven;
+package com.tinywind.babelcodegen.maven;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -52,10 +52,10 @@ public class Plugin extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException {
         if (skip) {
-            getLog().info("Skip JSX-CODEGEN");
+            getLog().info("Skip BABEL-CODEGEN");
             return;
         }
 
-        getLog().info("Complete JSX-CODEGEN");
+        getLog().info("Complete BABEL-CODEGEN");
     }
 }
