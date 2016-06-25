@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.tinywind.babelcodegen;
+package kr.tinywind.babelcodegen;
 
-import com.tinywind.babelcodegen.jaxb.*;
+import kr.tinywind.babelcodegen.jaxb.*;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -136,12 +136,6 @@ public class BabelCodegen {
                 System.out.println("Initialising properties: " + arg);
 
                 final Configuration configuration = load(in);
-                if (!isCorrected(configuration)) {
-                    System.out.println("Incorrect xml");
-                    System.exit(-1);
-                }
-
-                setDefault(configuration);
                 generate(configuration);
             } catch (Exception e) {
                 System.err.println("Cannot read " + arg + ". Error : " + e.getMessage());
@@ -186,6 +180,12 @@ public class BabelCodegen {
     }
 
     public static void generate(Configuration configuration) throws ScriptException, IOException {
+        if (!isCorrected(configuration)) {
+            System.err.println("Incorrect xml");
+            return;
+        }
+        setDefault(configuration);
+
         final BabelCodegen codegen = new BabelCodegen();
         configuration.getSources().forEach(source -> codegen.generate(new File(source.getSourceDir()), "", source, configuration.getBabelOptions()));
     }
