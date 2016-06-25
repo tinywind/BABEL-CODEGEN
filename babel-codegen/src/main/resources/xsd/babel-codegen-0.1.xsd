@@ -2,7 +2,8 @@
 <schema xmlns:tns="https://raw.githubusercontent.com/tinywind/BABEL-CODEGEN/master/babel-codegen/src/main/resources/xsd/babel-codegen-0.1.xsd"
         xmlns="http://www.w3.org/2001/XMLSchema"
         targetNamespace="https://raw.githubusercontent.com/tinywind/BABEL-CODEGEN/master/babel-codegen/src/main/resources/xsd/babel-codegen-0.1.xsd"
-        elementFormDefault="qualified">
+        elementFormDefault="qualified"
+        xmlns:jaxb="http://java.sun.com/xml/ns/jaxb">
 
     <element name="configuration">
         <complexType>
@@ -34,15 +35,15 @@
 
     <complexType name="BabelOptions">
         <all>
-            <element name="presets" type="tns:BabelPresets" default="react" minOccurs="0"/>
+            <element name="presets" type="tns:BabelPresets" default="REACT" minOccurs="0"/>
             <element name="minified" type="boolean" default="false" minOccurs="0"/>
         </all>
     </complexType>
 
     <simpleType name="BabelPresets">
         <restriction base="string">
-            <enumeration value="react"/>
-            <enumeration value="es2015"/>
+            <enumeration value="REACT"/>
+            <enumeration value="ES_2015"/>
         </restriction>
     </simpleType>
 </schema>

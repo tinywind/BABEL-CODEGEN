@@ -23,10 +23,7 @@
  */
 package com.tinywind.babelcodegen;
 
-import com.tinywind.babelcodegen.jaxb.BabelOptions;
-import com.tinywind.babelcodegen.jaxb.BabelPresets;
-import com.tinywind.babelcodegen.jaxb.Configuration;
-import com.tinywind.babelcodegen.jaxb.Source;
+import com.tinywind.babelcodegen.jaxb.*;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -145,7 +142,7 @@ public class BabelCodegen {
                 }
 
                 setDefault(configuration);
-                new BabelCodegen().generate(configuration);
+                generate(configuration);
             } catch (Exception e) {
                 System.err.println("Cannot read " + arg + ". Error : " + e.getMessage());
                 e.printStackTrace();
@@ -161,7 +158,7 @@ public class BabelCodegen {
         System.out.println("complete transform JSX -> JS");
     }
 
-    public static Configuration load(InputStream in) throws IOException {
+    private static Configuration load(InputStream in) throws IOException {
         final byte[] buffer = new byte[1000 * 1000];
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         for (int len; (len = in.read(buffer)) >= 0; )
@@ -188,7 +185,12 @@ public class BabelCodegen {
         }
     }
 
-    public void generate(File sourceDir, String subDir, Source source, BabelOptions babelOptions) {
+    public static void generate(Configuration configuration) throws ScriptException, IOException {
+        final BabelCodegen codegen = new BabelCodegen();
+        configuration.getSources().forEach(source -> codegen.generate(new File(source.getSourceDir()), "", source, configuration.getBabelOptions()));
+    }
+
+    private void generate(File sourceDir, String subDir, Source source, BabelOptions babelOptions) {
         if (!sourceDir.exists())
             sourceDir = new File(sourceDir.getAbsolutePath());
 
@@ -229,16 +231,12 @@ public class BabelCodegen {
             try {
                 final String originCode = new String(Files.readAllBytes(Paths.get(file.toURI())), source.getSourceEncoding());
                 bindings.put("input", originCode);
-                final String output = (String) engine.eval("Babel.transform(input, { presets: ['" + babelOptions.getPresets().value() + "'], minified: " + babelOptions.isMinified() + " }).code", bindings);
+                final String output = (String) engine.eval("Babel.transform(input, { presets: ['" + BabelPresetsAdapter.toString(babelOptions.getPresets()) + "'], minified: " + babelOptions.isMinified() + " }).code", bindings);
                 Files.write(Paths.get(targetFile.toURI()), output.getBytes(source.getTargetEncoding()));
                 System.out.println("   transformed: " + file.getAbsolutePath() + " -> " + targetFile.getAbsolutePath());
             } catch (IOException | ScriptException e) {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void generate(Configuration configuration) {
-        configuration.getSources().forEach(source -> generate(new File(source.getSourceDir()), "", source, configuration.getBabelOptions()));
     }
 }
