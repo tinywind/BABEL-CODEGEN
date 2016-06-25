@@ -28,6 +28,7 @@
             <element name="targetEncoding" type="string" default="UTF-8" minOccurs="0"/>
             <element name="overwrite" type="boolean" default="true" minOccurs="0"/>
             <element name="excludes" type="string" default="" minOccurs="0"/>
+            <element name="recursive" type="boolean" default="true" minOccurs="0"/>
         </all>
     </complexType>
 
