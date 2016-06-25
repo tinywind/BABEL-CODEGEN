@@ -119,7 +119,7 @@
         </profile>
 
         <profile>
-            <id>release-oss</id>
+            <id>release</id>
             <properties>
                 <java.version>1.8</java.version>
             </properties>

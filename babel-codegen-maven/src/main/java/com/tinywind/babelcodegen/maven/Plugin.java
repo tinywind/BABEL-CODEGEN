@@ -23,11 +23,21 @@
  */
 package com.tinywind.babelcodegen.maven;
 
+import com.tinywind.babelcodegen.BabelCodegen;
+import com.tinywind.babelcodegen.jaxb.BabelOptions;
+import com.tinywind.babelcodegen.jaxb.Configuration;
+import com.tinywind.babelcodegen.jaxb.Source;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+
+import javax.script.ScriptException;
+import javax.xml.bind.JAXB;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.List;
 
 import static org.apache.maven.plugins.annotations.LifecyclePhase.GENERATE_SOURCES;
 import static org.apache.maven.plugins.annotations.ResolutionScope.TEST;
@@ -49,10 +59,35 @@ public class Plugin extends AbstractMojo {
     @Parameter
     private boolean skip;
 
+    @Parameter
+    private List<Source> sources;
+
+    @Parameter
+    private BabelOptions babelOptions;
+
     @Override
     public void execute() throws MojoExecutionException {
         if (skip) {
             getLog().info("Skip BABEL-CODEGEN");
+            return;
+        }
+
+        final Configuration configuration = new Configuration();
+        configuration.setSources(sources);
+        configuration.setBabelOptions(babelOptions);
+
+        final StringWriter writer = new StringWriter();
+        JAXB.marshal(configuration, writer);
+
+        getLog().debug("Using this configuration:\n" + writer.toString());
+
+        try {
+            BabelCodegen.generate(configuration);
+        } catch (ScriptException | IOException e) {
+            e.printStackTrace();
+            getLog().error(e.getMessage());
+            if (e.getCause() != null)
+                getLog().error("  Cause: " + e.getCause().getMessage());
             return;
         }
 
