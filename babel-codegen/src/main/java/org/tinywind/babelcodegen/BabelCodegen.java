@@ -23,7 +23,7 @@
  */
 package org.tinywind.babelcodegen;
 
-import org.tinywind.babelcodegen.jaxb.BabelPresetsAdapter;
+import org.tinywind.babelcodegen.jaxb.*;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
