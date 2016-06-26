@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package kr.tinywind.babelcodegen;
+package org.tinywind.babelcodegen;
 
-import kr.tinywind.babelcodegen.jaxb.*;
+import org.tinywind.babelcodegen.jaxb.BabelPresetsAdapter;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;

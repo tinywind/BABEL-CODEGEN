@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>kr.tinywind</groupId>
+        <groupId>org.tinywind</groupId>
         <artifactId>babel-codegen-parent</artifactId>
-        <version>0.1.1-SNAPSHOT</version>
+        <version>0.1.2</version>
     </parent>
 
     <artifactId>babel-codegen</artifactId>
@@ -94,7 +94,7 @@
                             <schemaIncludes>
                                 <include>babel-codegen-0.1.xsd</include>
                             </schemaIncludes>
-                            <generatePackage>kr.tinywind.babelcodegen.jaxb</generatePackage>
+                            <generatePackage>org.tinywind.babelcodegen.jaxb</generatePackage>
                             <args>
                                 <arg>-Xxew</arg>
                                 <arg>-Xxew:instantiate lazy</arg>
