@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package kr.tinywind.babelcodegen.maven;
+package org.tinywind.babelcodegen.maven;
 
-import kr.tinywind.babelcodegen.BabelCodegen;
-import kr.tinywind.babelcodegen.jaxb.BabelOptions;
-import kr.tinywind.babelcodegen.jaxb.Configuration;
-import kr.tinywind.babelcodegen.jaxb.Source;
+import org.tinywind.babelcodegen.BabelCodegen;
+import org.tinywind.babelcodegen.jaxb.BabelOptions;
+import org.tinywind.babelcodegen.jaxb.Configuration;
+import org.tinywind.babelcodegen.jaxb.Source;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
