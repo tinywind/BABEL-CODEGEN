@@ -17,6 +17,7 @@ transform BABEL file into JS file
             </dependencies>
             <executions>
               <execution>
+                <phase>generate-sources</phase>
                 <goals>
                   <goal>generate</goal>
                 </goals>
