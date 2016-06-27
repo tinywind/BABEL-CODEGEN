@@ -8,13 +8,6 @@ transform BABEL file into JS file
             <groupId>org.tinywind</groupId>
             <artifactId>babel-codegen-maven</artifactId>
             <version>0.1.2</version>
-            <dependencies>
-              <dependency>
-                <groupId>org.tinywind</groupId>
-                <artifactId>babel-codegen</artifactId>
-                <version>0.1.2</version>
-              </dependency>
-            </dependencies>
             <executions>
               <execution>
                 <phase>generate-sources</phase>
