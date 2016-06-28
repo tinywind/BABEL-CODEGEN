@@ -32,6 +32,7 @@ import javax.script.SimpleBindings;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.nio.file.Files;
@@ -68,34 +69,34 @@ public class BabelCodegen {
         return true;
     }
 
-    private static void setDefault(Configuration configuration) {
+    private static void setDefault(Configuration configuration) throws NoSuchFieldException {
         if (configuration.getSources() == null)
             configuration.setSources(new ArrayList<>());
 
         for (Source source : configuration.getSources()) {
             final String sourceDir = source.getSourceDir();
-            source.setSourceDir(sourceDir == null ? "" : sourceDir.trim());
+            source.setSourceDir(sourceDir == null ? Source.class.getField("sourceDir").getAnnotation(XmlElement.class).defaultValue() : sourceDir.trim());
 
             final String targetDir = source.getTargetDir();
             source.setTargetDir(targetDir == null ? source.getSourceDir() : targetDir.trim());
 
             final String sourceEncoding = source.getSourceEncoding();
-            source.setSourceEncoding(sourceEncoding == null ? "UTF-8" : sourceEncoding.trim());
+            source.setSourceEncoding(sourceEncoding == null ? Source.class.getField("sourceEncoding").getAnnotation(XmlElement.class).defaultValue() : sourceEncoding.trim());
 
             final String targetEncoding = source.getTargetEncoding();
-            source.setTargetEncoding(targetEncoding == null ? "UTF-8" : targetEncoding.trim());
+            source.setTargetEncoding(targetEncoding == null ? Source.class.getField("targetEncoding").getAnnotation(XmlElement.class).defaultValue() : targetEncoding.trim());
 
             final String filePostfix = source.getSourceFilePostfix();
-            source.setSourceFilePostfix(filePostfix == null ? ".jsx" : filePostfix.trim());
+            source.setSourceFilePostfix(filePostfix == null ? Source.class.getField("sourceFilePostfix").getAnnotation(XmlElement.class).defaultValue() : filePostfix.trim());
 
             final String excludes = source.getExcludes();
-            source.setExcludes(excludes == null ? "" : excludes.trim());
+            source.setExcludes(excludes == null ? Source.class.getField("excludes").getAnnotation(XmlElement.class).defaultValue() : excludes.trim());
 
             final Boolean overwrite = source.isOverwrite();
-            source.setOverwrite(overwrite == null ? true : overwrite);
+            source.setOverwrite(overwrite == null ? Boolean.valueOf(Source.class.getField("overwrite").getAnnotation(XmlElement.class).defaultValue()) : overwrite);
 
             final Boolean recursive = source.isRecursive();
-            source.setOverwrite(recursive == null ? true : recursive);
+            source.setOverwrite(recursive == null ? Boolean.valueOf(Source.class.getField("recursive").getAnnotation(XmlElement.class).defaultValue()) : recursive);
         }
 
         if (configuration.getBabelOptions() == null)
@@ -103,15 +104,15 @@ public class BabelCodegen {
         final BabelOptions babelOptions = configuration.getBabelOptions();
 
         final BabelPresets presets = babelOptions.getPresets();
-        babelOptions.setPresets(presets == null ? BabelPresets.REACT : presets);
+        babelOptions.setPresets(presets == null ? BabelPresets.valueOf(BabelOptions.class.getField("presets").getAnnotation(XmlElement.class).defaultValue()) : presets);
 
         final Boolean minified = babelOptions.isMinified();
-        babelOptions.setMinified(minified == null ? false : minified);
+        babelOptions.setMinified(minified == null ? Boolean.valueOf(BabelOptions.class.getField("minified").getAnnotation(XmlElement.class).defaultValue()) : minified);
     }
 
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("Usage : BabelCodegen <configuration-file>");
+            System.err.println("Usage : " + BabelCodegen.class.getName() + " <configuration-file>");
             exit(-1);
         }
 
@@ -184,7 +185,11 @@ public class BabelCodegen {
             System.err.println("Incorrect xml");
             return;
         }
-        setDefault(configuration);
+        try {
+            setDefault(configuration);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
 
         final BabelCodegen codegen = new BabelCodegen();
         configuration.getSources().forEach(source -> codegen.generate(new File(source.getSourceDir()), "", source, configuration.getBabelOptions()));
