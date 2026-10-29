@@ -10,7 +10,7 @@
 
     <jaxb:globalBindings>
         <xjc:serializable uid="380"/>
-        <xjc:javaType name="java.lang.String" xmlType="xs:string" adapter="org.jooq.util.jaxb.tools.StringAdapter"/>
+        <xjc:javaType name="java.lang.String" xmlType="xs:string" adapter="org.tinywind.babelcodegen.jaxb.StringAdapter"/>
     </jaxb:globalBindings>
 
     <jaxb:bindings schemaLocation="../xsd/babel-codegen-0.1.xsd" multiple="true" node="//xs:complexType">
