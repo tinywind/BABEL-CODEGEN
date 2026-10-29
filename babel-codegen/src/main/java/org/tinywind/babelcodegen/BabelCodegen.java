@@ -26,7 +26,7 @@ package org.tinywind.babelcodegen;
 import org.tinywind.babelcodegen.jaxb.*;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 import javax.xml.XMLConstants;
@@ -52,8 +52,12 @@ public class BabelCodegen {
     private final ScriptEngine engine;
 
     public BabelCodegen() throws ScriptException, IOException {
-        engine = new ScriptEngineManager().getEngineByName("nashorn");
-        engine.eval(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("asset/babel.min.js")), bindings);
+        engine = new NashornScriptEngineFactory().getScriptEngine("--language=es6");
+        for (String resource : new String[]{"asset/console.js", "asset/core-js.min.js", "asset/babel.min.js"}) {
+            try (InputStreamReader reader = new InputStreamReader(getClass().getClassLoader().getResourceAsStream(resource), java.nio.charset.StandardCharsets.UTF_8)) {
+                engine.eval(reader, bindings);
+            }
+        }
     }
 
     private static boolean isCorrected(Configuration configuration) {
@@ -96,7 +100,7 @@ public class BabelCodegen {
             source.setOverwrite(overwrite == null ? Boolean.valueOf(Source.class.getField("overwrite").getAnnotation(XmlElement.class).defaultValue()) : overwrite);
 
             final Boolean recursive = source.isRecursive();
-            source.setOverwrite(recursive == null ? Boolean.valueOf(Source.class.getField("recursive").getAnnotation(XmlElement.class).defaultValue()) : recursive);
+            source.setRecursive(recursive == null ? Boolean.valueOf(Source.class.getField("recursive").getAnnotation(XmlElement.class).defaultValue()) : recursive);
         }
 
         if (configuration.getBabelOptions() == null)
@@ -219,9 +223,6 @@ public class BabelCodegen {
                     generate(file, subDir + (subDir.length() > 0 ? File.separatorChar : "") + file.getName(), source, babelOptions);
                 continue;
             }
-
-            if (file.exists() && !source.isOverwrite())
-                continue;
 
             final String fileName = file.getName();
             final String postfix = source.getSourceFilePostfix();

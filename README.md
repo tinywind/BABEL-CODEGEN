@@ -1,6 +1,8 @@
 # BABEL-CODEGEN
 transform BABEL file into JS file
 
+Requires JDK 17 and Maven 3. Run `mvn verify` to build both artifacts and run the six compiler/configuration contracts. Node.js is used for additional output verification; the compiler and Maven goal run entirely in the JVM. See [DEPENDENCY_UPGRADE.md](DEPENDENCY_UPGRADE.md) for compatibility and dependency details.
+
 # configure maven
     <build>
         <plugins>
@@ -37,7 +39,10 @@ transform BABEL file into JS file
         </plugins>
       </build>
 
-# result
+# historical result
+
+The following output records the original Java 8 version. The current compiler requires Java 17.
+
     "C:\Program Files\Java\jdk1.8.0_73\bin\java" "-Dmaven.home=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3" "-Dclassworlds.conf=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3\bin\m2.conf" -Didea.launcher.port=7536 "-Didea.launcher.bin.path=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\bin" -Dfile.encoding=UTF-8 -classpath "C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3\boot\plexus-classworlds-2.4.jar;C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\lib\idea_rt.jar" com.intellij.rt.execution.application.AppMain org.codehaus.classworlds.Launcher -Didea.version=2016.1.3 org.tinywind:babel-codegen-maven:0.1.3:generate
     [INFO] Scanning for projects...
     [INFO]                                                                         
