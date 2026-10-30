@@ -1,0 +1,4 @@
+mvnw text eol=lf
+mvnw.cmd text eol=crlf
+babel-codegen-gradle-plugin/gradlew text eol=lf
+babel-codegen-gradle-plugin/gradlew.bat text eol=crlf

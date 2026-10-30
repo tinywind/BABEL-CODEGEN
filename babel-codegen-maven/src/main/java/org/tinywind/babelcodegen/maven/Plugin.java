@@ -83,12 +83,8 @@ public class Plugin extends AbstractMojo {
 
         try {
             BabelCodegen.generate(configuration);
-        } catch (ScriptException | IOException e) {
-            e.printStackTrace();
-            getLog().error(e.getMessage());
-            if (e.getCause() != null)
-                getLog().error("  Cause: " + e.getCause().getMessage());
-            return;
+        } catch (ScriptException | IOException | IllegalArgumentException e) {
+            throw new MojoExecutionException("BABEL-CODEGEN failed: " + e.getMessage(), e);
         }
 
         getLog().info("Complete BABEL-CODEGEN");

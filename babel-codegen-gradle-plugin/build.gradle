@@ -1,0 +1,92 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+    id 'com.gradle.plugin-publish' version '2.2.1'
+}
+
+group = 'org.tinywind'
+version = '0.2.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.tinywind:babel-codegen:0.2.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation gradleTestKit()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+    options.addStringOption('Xdoclint:all,-missing', '-quiet')
+}
+
+tasks.withType(Test).configureEach {
+    useJUnit()
+    maxHeapSize = '768m'
+    systemProperty 'babelTestGradleHome', System.getProperty('babelTestGradleHome', gradle.gradleHomeDir.absolutePath)
+    systemProperty 'babelTestJavaHome', System.getProperty('babelTestJavaHome', System.getProperty('java.home'))
+    systemProperty 'babelTestJavaVersion', System.getProperty('java.specification.version')
+}
+
+gradlePlugin {
+    website = 'https://github.com/tinywind/BABEL-CODEGEN'
+    vcsUrl = 'https://github.com/tinywind/BABEL-CODEGEN.git'
+    plugins {
+        babelCodegen {
+            id = 'org.tinywind.babel-codegen'
+            implementationClass = 'org.tinywind.babelcodegen.gradle.BabelCodegenPlugin'
+            displayName = 'Babel Codegen'
+            description = 'Compile JavaScript and JSX with embedded Babel from a Gradle build.'
+            tags.set(['babel', 'javascript', 'jsx'])
+        }
+    }
+}
+
+publishing {
+    publications.withType(MavenPublication).configureEach {
+        pom {
+            name = 'BABEL-CODEGEN Gradle plugin'
+            description = 'Compile JavaScript and JSX with embedded Babel.'
+            url = 'https://github.com/tinywind/BABEL-CODEGEN'
+            licenses {
+                license {
+                    name = 'The MIT License'
+                    url = 'https://opensource.org/license/mit'
+                }
+            }
+            developers {
+                developer {
+                    id = 'tinywind'
+                    name = 'Jeon JaeHyeong'
+                    email = 'tinywind0@gmail.com'
+                }
+            }
+            scm {
+                connection = 'scm:git:https://github.com/tinywind/BABEL-CODEGEN.git'
+                developerConnection = 'scm:git:https://github.com/tinywind/BABEL-CODEGEN.git'
+                url = 'https://github.com/tinywind/BABEL-CODEGEN'
+            }
+        }
+    }
+}

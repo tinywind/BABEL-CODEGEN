@@ -1,0 +1,10 @@
+name: Babel Codegen source analysis
+
+paths-ignore:
+  - '**/.tmp/**'
+  - '**/target/**'
+  - '**/build/**'
+  - 'babel-codegen-maven/src/it/success/input/ignored.jsx'
+  - 'babel-codegen-maven/src/it/success/input/nested/ignored.jsx'
+  - 'babel-codegen-maven/src/it/success/input/vendor/broken.jsx'
+  - 'babel-codegen-maven/src/it/invalid-syntax/input/broken.jsx'
