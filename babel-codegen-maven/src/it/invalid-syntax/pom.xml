@@ -1,0 +1,18 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.tinywind.it</groupId>
+  <artifactId>invalid-syntax</artifactId>
+  <version>1</version>
+  <packaging>pom</packaging>
+  <properties><project.build.sourceEncoding>UTF-8</project.build.sourceEncoding></properties>
+  <build>
+    <resources><resource><directory>${project.build.directory}/generated-resources</directory></resource></resources>
+    <plugins>
+      <plugin>
+        <groupId>org.tinywind</groupId><artifactId>babel-codegen-maven</artifactId><version>@project.version@</version>
+        <executions><execution><phase>generate-sources</phase><goals><goal>generate</goal></goals></execution></executions>
+        <configuration><sources><source><sourceDir>${project.basedir}/input</sourceDir><targetDir>${project.basedir}/existing</targetDir></source></sources></configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

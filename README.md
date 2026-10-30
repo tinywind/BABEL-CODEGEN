@@ -1,68 +1,115 @@
 # BABEL-CODEGEN
-transform BABEL file into JS file
 
-Requires JDK 17 and Maven 3. Run `mvn verify` to build both artifacts and run the six compiler/configuration contracts. Node.js is used for additional output verification; the compiler and Maven goal run entirely in the JVM. See [DEPENDENCY_UPGRADE.md](DEPENDENCY_UPGRADE.md) for compatibility and dependency details.
+Compile JavaScript and JSX from Maven or Gradle with Babel 8 embedded in GraalJS. Both plugins run on Java 21 without a Node.js installation.
 
-# configure maven
-    <build>
-        <plugins>
-          <plugin>
-            <groupId>org.tinywind</groupId>
-            <artifactId>babel-codegen-maven</artifactId>
-            <version>0.1.3</version>
-            <executions>
-              <execution>
-                <phase>generate-sources</phase>
-                <goals>
-                  <goal>generate</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <sources>
-                  <source>
-                    <sourceDir>${project.basedir}/src/main/resources/static/js</sourceDir>
-                    <sourceEncoding>UTF-8</sourceEncoding>
-                    <sourceFilePostfix>.jsx</sourceFilePostfix>
-                    <targetDir>${project.basedir}/src/main/resources/static/js</targetDir>
-                    <targetEncoding>UTF-8</targetEncoding>
-                    <overwrite>true</overwrite>
-                    <recursive>true</recursive>
-                  </source>
-                </sources>
-                <babelOptions>
-                  <presets>REACT</presets>
-                  <minified>true</minified>
-                </babelOptions>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
+Version: **0.2.0**. The Maven plugin metadata requires Maven 3.10.0. The Gradle plugin supports Java 21 builds on Gradle 8.6 and 9.8.2; Java 25 is tested with Gradle 9.8.2.
 
-# historical result
+## Maven
 
-The following output records the original Java 8 version. The current compiler requires Java 17.
+Add the plugin and generated resource directory to your build:
 
-    "C:\Program Files\Java\jdk1.8.0_73\bin\java" "-Dmaven.home=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3" "-Dclassworlds.conf=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3\bin\m2.conf" -Didea.launcher.port=7536 "-Didea.launcher.bin.path=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\bin" -Dfile.encoding=UTF-8 -classpath "C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3\boot\plexus-classworlds-2.4.jar;C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\lib\idea_rt.jar" com.intellij.rt.execution.application.AppMain org.codehaus.classworlds.Launcher -Didea.version=2016.1.3 org.tinywind:babel-codegen-maven:0.1.3:generate
-    [INFO] Scanning for projects...
-    [INFO]                                                                         
-    [INFO] ------------------------------------------------------------------------
-    [INFO] Building spring-boot-reactive 0.0.1-SNAPSHOT
-    [INFO] ------------------------------------------------------------------------
-    [INFO] 
-    [INFO] --- babel-codegen-maven:0.1.3:generate (default-cli) @ reactive ---
-       transformed: C:\Users\tinywind\IdeaProjects\tinywind-spring-boot-reactive\src\main\resources\static\js\doms.jsx -> C:\Users\tinywind\IdeaProjects\tinywind-spring-boot-reactive\src\main\resources\static\js\doms.js
-       transformed: C:\Users\tinywind\IdeaProjects\tinywind-spring-boot-reactive\src\main\resources\static\js\playfield.jsx -> C:\Users\tinywind\IdeaProjects\tinywind-spring-boot-reactive\src\main\resources\static\js\playfield.js
-    [INFO] Complete BABEL-CODEGEN
-    [INFO] ------------------------------------------------------------------------
-    [INFO] BUILD SUCCESS
-    [INFO] ------------------------------------------------------------------------
-    [INFO] Total time: 13.319s
-    [INFO] Finished at: Sat Jun 25 15:02:39 KST 2016
-    [INFO] Final Memory: 25M/619M
-    [INFO] ------------------------------------------------------------------------
-    
-    Process finished with exit code 0
+```xml
+<build>
+  <resources>
+    <resource><directory>src/main/resources</directory></resource>
+    <resource><directory>${project.build.directory}/generated-resources</directory></resource>
+  </resources>
+  <plugins>
+    <plugin>
+      <groupId>org.tinywind</groupId>
+      <artifactId>babel-codegen-maven</artifactId>
+      <version>0.2.0</version>
+      <executions>
+        <execution>
+          <phase>generate-resources</phase>
+          <goals><goal>generate</goal></goals>
+        </execution>
+      </executions>
+      <configuration>
+        <sources>
+          <source>
+            <sourceDir>${project.basedir}/src/main/js</sourceDir>
+            <targetDir>${project.build.directory}/generated-resources/static/js</targetDir>
+            <excludes>**/ignored.jsx,vendor/**</excludes>
+          </source>
+        </sources>
+        <babelOptions>
+          <presets>REACT</presets>
+          <minified>true</minified>
+        </babelOptions>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
+```
 
-# LICENSE
-**The MIT License (MIT)**
+The goal remains `babel-codegen:generate`. Set `<skip>true</skip>` in the plugin configuration to skip generation. Configure each source's input and output directories explicitly.
+
+## Gradle
+
+```groovy
+plugins {
+    id 'java'
+    id 'org.tinywind.babel-codegen' version '0.2.0'
+}
+
+babelCodegen {
+    preset.set('REACT')
+    minified.set(true)
+    sources {
+        main {
+            sourceDir.set(layout.projectDirectory.dir('src/main/js'))
+            excludes.set(['**/ignored.jsx', 'vendor/**'])
+        }
+    }
+}
+
+tasks.named('processResources') {
+    from(tasks.named('babelCodegen')) {
+        into 'static/js'
+    }
+}
+```
+
+The `babelCodegen` task generates each named source into `build/generated/babel/<name>` by default. Set its `targetDir` to choose another directory. Add more named sources when you need multiple input roots. Set `babelCodegen.skip` to `true` to skip the task. The Java resource configuration above also makes generation a dependency of `processResources`.
+
+The extension uses Gradle properties and supports Groovy and Kotlin DSL. For example, a Kotlin source declaration is:
+
+```kotlin
+babelCodegen {
+    sources {
+        create("main") {
+            sourceDir.set(layout.projectDirectory.dir("src/main/js"))
+            excludes.set(listOf("**/ignored.jsx", "vendor/**"))
+        }
+    }
+}
+```
+
+## Options and failure behavior
+
+Each source supports `sourceEncoding` and `targetEncoding` (default `UTF-8`), `sourceFilePostfix` (default `.jsx`), `recursive` (default `true`), and `overwrite` (default `true`). Exclusions use a comma-separated string in Maven and a list of strings in Gradle.
+
+Exclusion patterns are case-sensitive Ant patterns relative to the input root. `**/ignored.jsx` matches root and nested files; `vendor/**` skips that directory before traversing or parsing it. `overwrite=false` preserves existing files and still generates missing files.
+
+`REACT` preserves classic `React.createElement` output. `ES_2015` uses Babel's `env` preset with an IE 11 syntax target and CommonJS modules. Applications provide any required runtime polyfills. `minified` requests compact Babel output.
+
+Invalid configuration, missing input directories, JavaScript syntax errors and output failures fail the build. A syntax error preserves that file's existing output. Other files already generated before a failure remain on disk. The CLI exits nonzero when configuration or generation fails.
+
+## Build and verify
+
+Use Java 21. The Maven wrapper downloads the pinned Maven 3.10.0 distribution and checks its SHA-256:
+
+```sh
+./mvnw -B -ntp install
+cd babel-codegen-gradle-plugin
+./gradlew --no-daemon build
+```
+
+The Maven build runs compiler tests, Maven goal tests and isolated Maven consumer builds. The Gradle build runs real TestKit consumers, including Kotlin DSL, resource packaging, configuration-cache reuse, exclusions, overwrite and failure behavior.
+
+See [DEPENDENCY_UPGRADE.md](DEPENDENCY_UPGRADE.md) for runtime versions, compatibility and publication details.
+
+## License
+
+[MIT](LICENSE.txt). The bundled Babel distribution retains its upstream license under `META-INF/licenses`.

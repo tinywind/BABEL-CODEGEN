@@ -1,0 +1,45 @@
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['21', '25']
+    steps:
+      - name: Checkout (v7)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up Java (v6.1.0)
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+      - name: Install Java 21 toolchain for the Java 25 build
+        if: matrix.java == '25'
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Select the build JVM
+        if: matrix.java == '25'
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Verify and install compiler and Maven plugin
+        run: ./mvnw -B -ntp install
+      - name: Verify Gradle plugin and consumers
+        working-directory: babel-codegen-gradle-plugin
+        run: ./gradlew --no-daemon --console=plain build

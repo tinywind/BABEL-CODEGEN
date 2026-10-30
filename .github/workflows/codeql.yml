@@ -1,0 +1,55 @@
+name: CodeQL
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  schedule:
+    - cron: '0 20 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+    steps:
+      - name: Checkout (v7)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up Java 21
+        if: matrix.language == 'java-kotlin'
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended
+          config-file: .github/codeql/codeql-config.yml
+      - name: Build compiler and Maven adapter
+        if: matrix.language == 'java-kotlin'
+        run: ./mvnw -B -ntp -DskipTests -Dinvoker.skip=true install
+      - name: Build Gradle adapter
+        if: matrix.language == 'java-kotlin'
+        working-directory: babel-codegen-gradle-plugin
+        run: ./gradlew --no-daemon --console=plain compileJava
+      - name: Analyze
+        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370
+        with:
+          category: '/language:${{ matrix.language }}'
