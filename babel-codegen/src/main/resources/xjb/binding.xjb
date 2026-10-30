@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <jaxb:bindings
-        xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+        xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
         xmlns:xs="http://www.w3.org/2001/XMLSchema"
         xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:annox="http://annox.dev.java.net"
-        xsi:schemaLocation="http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd"
-        version="2.1">
+        xmlns:annox="urn:jaxb.jvnet.org:annox"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/jaxb https://jakarta.ee/xml/ns/jaxb/bindingschema_3_0.xsd"
+        jaxb:extensionBindingPrefixes="xjc annox"
+        version="3.0">
 
     <jaxb:globalBindings>
         <xjc:serializable uid="380"/>
         <xjc:javaType name="java.lang.String" xmlType="xs:string" adapter="org.tinywind.babelcodegen.jaxb.StringAdapter"/>
     </jaxb:globalBindings>
 
-    <jaxb:bindings schemaLocation="../xsd/babel-codegen-0.1.xsd" multiple="true" node="//xs:complexType">
-        <annox:annotate>
-            <annox:annotate annox:class="java.lang.SuppressWarnings" value="all"/>
-        </annox:annotate>
+    <jaxb:bindings schemaLocation="../xsd/babel-codegen-0.1.xsd" multiple="true" node="//xs:complexType[not(@name='Sources')]">
+        <annox:annotate>@java.lang.SuppressWarnings("all")</annox:annotate>
+    </jaxb:bindings>
+    <jaxb:bindings schemaLocation="../xsd/babel-codegen-0.1.xsd"
+                   node="//xs:element[@name='configuration']/xs:complexType/xs:all/xs:element[@name='sources']">
+        <annox:annotate target="field">@jakarta.xml.bind.annotation.XmlElementWrapper(name="sources", required=true)</annox:annotate>
     </jaxb:bindings>
 </jaxb:bindings>

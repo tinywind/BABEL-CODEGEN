@@ -1,6 +1,6 @@
 package org.tinywind.babelcodegen.jaxb;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 public final class StringAdapter extends XmlAdapter<String, String> {
     @Override

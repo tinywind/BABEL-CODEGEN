@@ -34,7 +34,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import javax.script.ScriptException;
-import javax.xml.bind.JAXB;
+import jakarta.xml.bind.JAXB;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
