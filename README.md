@@ -2,7 +2,7 @@
 
 Compile JavaScript and JSX from Maven or Gradle with Babel 8 embedded in GraalJS. Both plugins run on Java 21 without a Node.js installation.
 
-Version: **0.2.1**. The Maven plugin metadata requires Maven 3.10.0. The Gradle plugin supports Java 21 builds on Gradle 8.6 and 9.8.2; Java 25 is tested with Gradle 9.8.2.
+Version `0.2.1`. The Maven plugin metadata requires Maven 3.10.0. The Gradle plugin supports Java 21 builds on Gradle 8.6 and 9.8.2; Java 25 is tested with Gradle 9.8.2.
 
 ## Maven
 
@@ -43,7 +43,7 @@ Add the plugin and generated resource directory to your build:
 </build>
 ```
 
-The goal remains `babel-codegen:generate`. Set `<skip>true</skip>` in the plugin configuration to skip generation. Configure each source's input and output directories explicitly.
+Run `mvn generate-resources` with this configuration, or invoke the goal with `mvn babel-codegen:generate`. Set `<skip>true</skip>` in the plugin configuration to skip generation. Configure each source's input and output directories explicitly.
 
 ## Gradle
 
