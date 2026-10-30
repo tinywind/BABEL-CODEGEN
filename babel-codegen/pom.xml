@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.tinywind</groupId>
         <artifactId>babel-codegen-parent</artifactId>
-        <version>0.2.0</version>
+        <version>0.2.1</version>
     </parent>
 
     <artifactId>babel-codegen</artifactId>
@@ -27,20 +27,19 @@
             <artifactId>plexus-utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>2.3.3</version>
+            <version>4.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>2.3.9</version>
+            <version>4.0.9</version>
         </dependency>
         <dependency>
             <groupId>org.graalvm.polyglot</groupId>
@@ -110,9 +109,9 @@
             </plugin>
 
             <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.15.3</version>
+                <groupId>org.jvnet.jaxb</groupId>
+                <artifactId>jaxb-maven-plugin</artifactId>
+                <version>${jaxb-tools.version}</version>
                 <executions>
                     <execution>
                         <id>jaxb-generate</id>
@@ -131,32 +130,25 @@
                             </schemaIncludes>
                             <generatePackage>org.tinywind.babelcodegen.jaxb</generatePackage>
                             <args>
-                                <arg>-Xxew</arg>
-                                <arg>-Xxew:instantiate lazy</arg>
+                                <arg>-XelementWrapper</arg>
+                                <arg>-XelementWrapper:instantiate lazy</arg>
+                                <arg>-XelementWrapper:delete</arg>
+                                <arg>-Xsetters</arg>
+                                <arg>-Xsetters-mode=direct</arg>
                                 <arg>-Xfluent-api</arg>
                                 <arg>-Xdefault-value</arg>
                                 <arg>-Xannotate</arg>
                             </args>
                             <plugins>
                                 <plugin>
-                                    <groupId>com.github.jaxb-xew-plugin</groupId>
-                                    <artifactId>jaxb-xew-plugin</artifactId>
-                                    <version>1.10</version>
+                                    <groupId>org.jvnet.jaxb</groupId>
+                                    <artifactId>jaxb-plugins</artifactId>
+                                    <version>${jaxb-tools.version}</version>
                                 </plugin>
                                 <plugin>
-                                    <groupId>org.jvnet.jaxb2_commons</groupId>
-                                    <artifactId>jaxb2-fluent-api</artifactId>
-                                    <version>3.0</version>
-                                </plugin>
-                                <plugin>
-                                    <groupId>org.jvnet.jaxb2_commons</groupId>
-                                    <artifactId>jaxb2-default-value</artifactId>
-                                    <version>1.1</version>
-                                </plugin>
-                                <plugin>
-                                    <groupId>org.jvnet.jaxb2_commons</groupId>
-                                    <artifactId>jaxb2-basics-annotate</artifactId>
-                                    <version>1.1.0</version>
+                                    <groupId>org.jvnet.jaxb</groupId>
+                                    <artifactId>jaxb-plugin-annotate</artifactId>
+                                    <version>${jaxb-tools.version}</version>
                                 </plugin>
                             </plugins>
                         </configuration>

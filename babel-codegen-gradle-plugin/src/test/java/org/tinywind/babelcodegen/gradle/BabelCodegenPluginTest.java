@@ -3,22 +3,21 @@ package org.tinywind.babelcodegen.gradle;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BabelCodegenPluginTest {
-    @Rule
-    public TemporaryFolder temporary = new TemporaryFolder(new File("build"));
+    @TempDir
+    public Path temporary;
 
     @Test
     public void compilesExcludedInputsAndReusesConfigurationCache() throws Exception {
@@ -31,20 +30,20 @@ public class BabelCodegenPluginTest {
         write(project, "build.gradle", configuration("REACT", "", false));
         BuildResult result = runner(project, "babelCodegen", "--configuration-cache").build();
         assertEquals(TaskOutcome.SUCCESS, result.task(":babelCodegen").getOutcome());
-        assertTrue(result.getOutput(), result.getOutput().contains("BABEL_TEST_JAVA=" + System.getProperty("babelTestJavaVersion")));
+        assertTrue(result.getOutput().contains("BABEL_TEST_JAVA=" + System.getProperty("babelTestJavaVersion")), result.getOutput());
         System.out.println("Verified consumer Java " + System.getProperty("babelTestJavaVersion")
                 + " on " + System.getProperty("babelTestGradleHome"));
         String compiled = Files.readString(project.resolve("output/sample.js"));
-        assertTrue(compiled, compiled.contains("React.createElement"));
-        assertTrue(compiled, compiled.contains("한글"));
-        assertFalse(compiled, compiled.contains("react/jsx-runtime"));
+        assertTrue(compiled.contains("React.createElement"), compiled);
+        assertTrue(compiled.contains("한글"), compiled);
+        assertFalse(compiled.contains("react/jsx-runtime"), compiled);
         assertTrue(Files.isRegularFile(project.resolve("output/nested/sample.js")));
         assertFalse(Files.exists(project.resolve("output/ignored.js")));
         assertFalse(Files.exists(project.resolve("output/nested/ignored.js")));
         assertFalse(Files.exists(project.resolve("output/vendor")));
         BuildResult cached = runner(project, "babelCodegen", "--configuration-cache").build();
         assertEquals(TaskOutcome.UP_TO_DATE, cached.task(":babelCodegen").getOutcome());
-        assertTrue(cached.getOutput(), cached.getOutput().contains("Configuration cache entry reused"));
+        assertTrue(cached.getOutput().contains("Configuration cache entry reused"), cached.getOutput());
     }
 
     @Test
@@ -54,7 +53,7 @@ public class BabelCodegenPluginTest {
         write(project, "output/broken.js", "preserved-content");
         write(project, "build.gradle", configuration("REACT", "", false));
         BuildResult result = runner(project, "babelCodegen").buildAndFail();
-        assertTrue(result.getOutput(), result.getOutput().contains("broken.jsx"));
+        assertTrue(result.getOutput().contains("broken.jsx"), result.getOutput());
         assertEquals("preserved-content", Files.readString(project.resolve("output/broken.js")));
     }
 
@@ -77,8 +76,8 @@ public class BabelCodegenPluginTest {
         runner(project, "babelCodegen").build();
         assertEquals("preserved-content", Files.readString(project.resolve("output/existing.js")));
         String compiled = Files.readString(project.resolve("output/new.js"));
-        assertFalse(compiled, compiled.contains("=>"));
-        assertTrue(compiled, compiled.contains("double"));
+        assertFalse(compiled.contains("=>"), compiled);
+        assertTrue(compiled.contains("double"), compiled);
     }
 
     @Test
@@ -105,8 +104,8 @@ public class BabelCodegenPluginTest {
                 + "sourceDir.set(layout.projectDirectory.dir(\"input\")) } } }\n");
         runner(project, "babelCodegen").build();
         String compiled = Files.readString(project.resolve("build/generated/babel/main/sample.js"));
-        assertTrue(compiled, compiled.contains("React.createElement"));
-        assertTrue(compiled, compiled.contains("한글"));
+        assertTrue(compiled.contains("React.createElement"), compiled);
+        assertTrue(compiled.contains("한글"), compiled);
     }
 
     @Test
@@ -124,7 +123,7 @@ public class BabelCodegenPluginTest {
     }
 
     private Path project() throws Exception {
-        Path project = temporary.newFolder("consumer").toPath().toAbsolutePath();
+        Path project = Files.createDirectory(temporary.resolve("consumer")).toAbsolutePath();
         write(project, "settings.gradle", "rootProject.name = 'babel-consumer'\n"
                 + "println('BABEL_TEST_JAVA=' + System.getProperty('java.specification.version'))\n");
         java.util.Properties properties = new java.util.Properties();

@@ -6,13 +6,17 @@
     <parent>
         <groupId>org.tinywind</groupId>
         <artifactId>babel-codegen-parent</artifactId>
-        <version>0.2.0</version>
+        <version>0.2.1</version>
     </parent>
 
     <artifactId>babel-codegen-maven</artifactId>
     <name>BABEL-CODEGEN Maven</name>
 
     <packaging>maven-plugin</packaging>
+
+    <prerequisites>
+        <maven>3.10.0</maven>
+    </prerequisites>
 
     <licenses>
         <license>
@@ -37,7 +41,7 @@
                     <goals>
                         <goal>package</goal>
                     </goals>
-                    <mavenOpts>-Xmx768m -Djava.io.tmpdir=${project.build.directory}</mavenOpts>
+                    <mavenOpts>-Xmx768m</mavenOpts>
                     <timeoutInSeconds>180</timeoutInSeconds>
                 </configuration>
                 <executions>
@@ -82,9 +86,8 @@
             <artifactId>babel-codegen</artifactId>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

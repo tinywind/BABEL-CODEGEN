@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'org.tinywind'
-version = '0.2.0'
+version = '0.2.1'
 
 java {
     toolchain {
@@ -21,8 +21,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.tinywind:babel-codegen:0.2.0'
-    testImplementation 'junit:junit:4.13.2'
+    implementation 'org.tinywind:babel-codegen:0.2.1'
+    testImplementation platform('org.junit:junit-bom:6.1.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation gradleTestKit()
 }
 
@@ -42,7 +44,8 @@ tasks.withType(Javadoc).configureEach {
 }
 
 tasks.withType(Test).configureEach {
-    useJUnit()
+    useJUnitPlatform()
+    systemProperty 'java.io.tmpdir', temporaryDir.absolutePath
     maxHeapSize = '768m'
     systemProperty 'babelTestGradleHome', System.getProperty('babelTestGradleHome', gradle.gradleHomeDir.absolutePath)
     systemProperty 'babelTestJavaHome', System.getProperty('babelTestJavaHome', System.getProperty('java.home'))

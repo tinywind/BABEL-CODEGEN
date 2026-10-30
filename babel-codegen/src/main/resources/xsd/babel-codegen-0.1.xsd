@@ -3,7 +3,7 @@
         xmlns="http://www.w3.org/2001/XMLSchema"
         targetNamespace="https://raw.githubusercontent.com/tinywind/BABEL-CODEGEN/master/babel-codegen/src/main/resources/xsd/babel-codegen-0.1.xsd"
         elementFormDefault="qualified"
-        xmlns:jaxb="http://java.sun.com/xml/ns/jaxb">
+        xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb">
 
     <element name="configuration">
         <complexType>
