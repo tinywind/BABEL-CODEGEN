@@ -31,6 +31,13 @@ updates:
       - patch
 - package-ecosystem: maven
   directory: /
+  ignore:
+  - dependency-name: org.glassfish.jaxb:jaxb-runtime
+    # Retain the public javax.xml.bind configuration model.
+    versions: ["[3.0,)"]
+  - dependency-name: com.github.jaxb-xew-plugin:jaxb-xew-plugin
+    # Upstream marks 1.11 invalid; 2.x requires Jakarta.
+    versions: ["1.11", "[2.0,)"]
   schedule:
     interval: weekly
     day: monday

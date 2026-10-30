@@ -62,7 +62,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>jaxb2-maven-plugin</artifactId>
-                    <version>1.5</version>
+                    <version>4.2.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -133,7 +133,6 @@
                             <args>
                                 <arg>-Xxew</arg>
                                 <arg>-Xxew:instantiate lazy</arg>
-                                <arg>-Xxew:delete</arg>
                                 <arg>-Xfluent-api</arg>
                                 <arg>-Xdefault-value</arg>
                                 <arg>-Xannotate</arg>
@@ -142,7 +141,7 @@
                                 <plugin>
                                     <groupId>com.github.jaxb-xew-plugin</groupId>
                                     <artifactId>jaxb-xew-plugin</artifactId>
-                                    <version>1.0</version>
+                                    <version>1.10</version>
                                 </plugin>
                                 <plugin>
                                     <groupId>org.jvnet.jaxb2_commons</groupId>
@@ -157,7 +156,7 @@
                                 <plugin>
                                     <groupId>org.jvnet.jaxb2_commons</groupId>
                                     <artifactId>jaxb2-basics-annotate</artifactId>
-                                    <version>0.6.2</version>
+                                    <version>1.1.0</version>
                                 </plugin>
                             </plugins>
                         </configuration>

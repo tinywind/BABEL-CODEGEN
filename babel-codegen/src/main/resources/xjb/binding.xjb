@@ -13,7 +13,7 @@
         <xjc:javaType name="java.lang.String" xmlType="xs:string" adapter="org.tinywind.babelcodegen.jaxb.StringAdapter"/>
     </jaxb:globalBindings>
 
-    <jaxb:bindings schemaLocation="../xsd/babel-codegen-0.1.xsd" multiple="true" node="//xs:complexType">
+    <jaxb:bindings schemaLocation="../xsd/babel-codegen-0.1.xsd" multiple="true" node="//xs:complexType[not(@name='Sources')]">
         <annox:annotate>
             <annox:annotate annox:class="java.lang.SuppressWarnings" value="all"/>
         </annox:annotate>
