@@ -6,7 +6,7 @@
 
     <groupId>org.tinywind</groupId>
     <artifactId>babel-codegen-parent</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
     <packaging>pom</packaging>
 
     <name>BABEL-CODEGEN Parent</name>
@@ -20,7 +20,7 @@
     <licenses>
         <license>
             <name>The MIT License (MIT)</name>
-            <url>https://raw.githubusercontent.com/tinywind/BABEL-CODEGEN/master/LICENSE.txt</url>
+            <url>https://raw.githubusercontent.com/tinywind/BABEL-CODEGEN/main/LICENSE.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>

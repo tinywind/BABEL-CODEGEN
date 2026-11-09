@@ -1,10 +1,10 @@
 # Runtime and plugin compatibility
 
-Version 0.2.1 requires Java 21. The Maven coordinates `org.tinywind:babel-codegen` and `org.tinywind:babel-codegen-maven`, Maven goal `generate`, goal prefix `babel-codegen`, existing configuration XML namespace, JAXB fluent API, and `REACT`/`ES_2015` values remain available.
+Version 0.2.2 requires Java 21. The Maven coordinates `org.tinywind:babel-codegen` and `org.tinywind:babel-codegen-maven`, Maven goal `generate`, goal prefix `babel-codegen`, existing configuration XML namespace, JAXB fluent API, and `REACT`/`ES_2015` values remain available.
 
 ## Compiler runtime
 
-The compiler embeds the official `@babel/standalone` 8.0.10 distribution and uses `org.graalvm.polyglot:polyglot` and `org.graalvm.polyglot:js` 25.4.4.1.1. It loads Babel from the packaged JAR. Node.js and network access are unnecessary during compilation after the Java dependencies have been resolved.
+The compiler embeds the official `@babel/standalone` 8.0.10 distribution and uses `org.graalvm.polyglot:polyglot` and `org.graalvm.polyglot:js` 25.5.5.0.3. It loads Babel from the packaged JAR. Node.js and network access are unnecessary during compilation after the Java dependencies have been resolved.
 
 GraalJS contexts deny Java host access and host class lookup. The compiler closes each context after success or failure, including initialization failures. Nashorn and its console/core-js compatibility resources have been removed.
 
@@ -26,7 +26,7 @@ Exclusions are case-sensitive Ant patterns, relative to each input root. Comma-s
 
 ## Gradle plugin
 
-Plugin ID: `org.tinywind.babel-codegen`, version `0.2.1`. Implementation artifact: `org.tinywind:babel-codegen-gradle-plugin:0.2.1`.
+Plugin ID: `org.tinywind.babel-codegen`, version `0.2.2`. Implementation artifact: `org.tinywind:babel-codegen-gradle-plugin:0.2.2`.
 
 The native Java Gradle project shares the Maven-built compiler. The `babelCodegen` extension and task use Gradle properties and named sources. Inputs and output directories participate in up-to-date checks, and the task supports configuration-cache reuse. Build caching is disabled by default because preserving existing output with `overwrite=false` makes that output depend on its prior contents.
 
