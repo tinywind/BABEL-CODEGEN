@@ -2,7 +2,7 @@
 
 Compile JavaScript and JSX from Maven or Gradle with Babel 8 embedded in GraalJS. Both plugins run on Java 21 without a Node.js installation.
 
-Version `0.2.1`. The Maven plugin metadata requires Maven 3.10.0. The Gradle plugin supports Java 21 builds on Gradle 8.6 and 9.8.2; Java 25 is tested with Gradle 9.8.2.
+Version `0.2.2`. The Maven plugin metadata requires Maven 3.10.0. The Gradle plugin supports Java 21 builds on Gradle 8.6 and 9.8.2; Java 25 is tested with Gradle 9.8.2.
 
 ## Maven
 
@@ -18,7 +18,7 @@ Add the plugin and generated resource directory to your build:
     <plugin>
       <groupId>org.tinywind</groupId>
       <artifactId>babel-codegen-maven</artifactId>
-      <version>0.2.1</version>
+      <version>0.2.2</version>
       <executions>
         <execution>
           <phase>generate-resources</phase>
@@ -50,7 +50,7 @@ Run `mvn generate-resources` with this configuration, or invoke the goal with `m
 ```groovy
 plugins {
     id 'java'
-    id 'org.tinywind.babel-codegen' version '0.2.1'
+    id 'org.tinywind.babel-codegen' version '0.2.2'
 }
 
 babelCodegen {
@@ -96,7 +96,7 @@ Exclusion patterns are case-sensitive Ant patterns relative to the input root. `
 
 Invalid configuration, missing input directories, JavaScript syntax errors and output failures fail the build. A syntax error preserves that file's existing output. Other files already generated before a failure remain on disk. The CLI exits nonzero when configuration or generation fails.
 
-Version 0.2.1 uses Jakarta XML Binding 4. Java callers that marshal the configuration model or implement XML adapters must use `jakarta.xml.bind` imports. Existing XML configuration files and Maven/Gradle options retain their format.
+Since 0.2.1, the project uses Jakarta XML Binding 4. Java callers that marshal the configuration model or implement XML adapters must use `jakarta.xml.bind` imports. Existing XML configuration files and Maven/Gradle options retain their format.
 
 ## Build and verify
 
