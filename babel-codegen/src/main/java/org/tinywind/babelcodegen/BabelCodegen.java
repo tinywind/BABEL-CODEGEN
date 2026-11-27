@@ -35,7 +35,10 @@ import javax.script.ScriptException;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Locale;
 
 import static java.lang.System.exit;
@@ -187,7 +190,7 @@ public class BabelCodegen implements AutoCloseable {
 
         try (BabelCodegen codegen = new BabelCodegen()) {
             for (Source source : configuration.getSources())
-                codegen.generate(new File(source.getSourceDir()), "", source, configuration.getBabelOptions());
+                codegen.generate(new File(source.getSourceDir()), "", source, configuration.getBabelOptions(), new HashSet<>());
         }
     }
 
@@ -204,7 +207,11 @@ public class BabelCodegen implements AutoCloseable {
         return false;
     }
 
-    private void generate(File sourceDir, String subDir, Source source, BabelOptions babelOptions) throws IOException, ScriptException {
+    private void generate(File sourceDir, String subDir, Source source, BabelOptions babelOptions,
+                          Set<Path> ancestors) throws IOException, ScriptException {
+        Path directory = sourceDir.toPath().toRealPath();
+        if (!ancestors.add(directory))
+            return;
         final File[] childFiles = sourceDir.listFiles();
         if (childFiles == null)
             throw new IOException("Cannot read source directory: " + sourceDir.getAbsolutePath());
@@ -220,7 +227,7 @@ public class BabelCodegen implements AutoCloseable {
                 continue;
             if (file.isDirectory()) {
                 if (source.isRecursive())
-                    generate(file, relativePath.replace('/', File.separatorChar), source, babelOptions);
+                    generate(file, relativePath.replace('/', File.separatorChar), source, babelOptions, ancestors);
                 continue;
             }
 
@@ -249,5 +256,6 @@ public class BabelCodegen implements AutoCloseable {
                 throw new IOException("Cannot transform " + file.getAbsolutePath() + ": " + e.getMessage(), e);
             }
         }
+        ancestors.remove(directory);
     }
 }

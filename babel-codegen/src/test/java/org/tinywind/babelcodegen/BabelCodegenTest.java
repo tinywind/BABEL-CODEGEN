@@ -268,6 +268,25 @@ public class BabelCodegenTest {
     }
 
     @Test
+    public void skipsAncestorLinksAndStillGeneratesThroughSiblingAliases() throws Exception {
+        Path input = Files.createDirectory(temporary.resolve("input"));
+        Path nested = Files.createDirectory(input.resolve("nested"));
+        Path output = temporary.resolve("output");
+        Files.writeString(nested.resolve("sample.jsx"), "const label = 1;");
+        try {
+            Files.createSymbolicLink(nested.resolve("back"), input);
+            Files.createSymbolicLink(input.resolve("alias"), nested);
+        } catch (UnsupportedOperationException | java.nio.file.FileSystemException e) {
+            org.junit.jupiter.api.Assumptions.abort("Symbolic links unavailable: " + e.getMessage());
+        }
+        BabelCodegen.generate(configuration(input, output, BabelPresets.REACT, true, true, false));
+        for (String name : List.of("nested", "alias")) {
+            assertTrue(Files.exists(output.resolve(name + "/sample.js")));
+            assertFalse(Files.exists(output.resolve(name + "/back")));
+        }
+    }
+
+    @Test
     public void concurrentGenerationsKeepTheirOwnCompilerContext() throws Exception {
         Path input = Files.createDirectory(temporary.resolve("input"));
         Files.writeString(input.resolve("sample.jsx"), "const label = value => value;");
