@@ -1,0 +1,10 @@
+# Orca worktree lifecycle hooks (only used when opened in Orca).
+scripts:
+  setup: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ./mvnw -B -ntp install -DskipTests -Dinvoker.skip=true
+    (
+      cd babel-codegen-gradle-plugin
+      ./gradlew --no-daemon --console=plain testClasses
+    )
