@@ -38,6 +38,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Locale;
 
@@ -184,18 +186,32 @@ public class BabelCodegen implements AutoCloseable {
     }
 
     public static void generate(Configuration configuration) throws ScriptException, IOException {
+        generate(configuration, Map.of());
+    }
+
+    /**
+     * Generates each source with its supplied list of Ant patterns. Sources without
+     * a list use their comma-separated XML excludes.
+     */
+    public static void generate(Configuration configuration, Map<Source, List<String>> excludesBySource)
+            throws ScriptException, IOException {
         if (!isCorrected(configuration))
             throw new IllegalArgumentException("Configuration must contain at least one nonblank source directory");
         setDefault(configuration);
 
         try (BabelCodegen codegen = new BabelCodegen()) {
-            for (Source source : configuration.getSources())
-                codegen.generate(new File(source.getSourceDir()), "", source, configuration.getBabelOptions(), new HashSet<>());
+            for (Source source : configuration.getSources()) {
+                List<String> excludes = excludesBySource.get(source);
+                if (excludes == null)
+                    excludes = List.of(source.getExcludes().split(","));
+                codegen.generate(new File(source.getSourceDir()), "", source, configuration.getBabelOptions(),
+                        excludes, new HashSet<>());
+            }
         }
     }
 
-    private static boolean isExcluded(String relativePath, String excludes) {
-        for (String value : excludes.split(",")) {
+    private static boolean isExcluded(String relativePath, List<String> excludes) {
+        for (String value : excludes) {
             String pattern = value.trim().replace('\\', '/');
             if (pattern.isEmpty())
                 continue;
@@ -208,7 +224,7 @@ public class BabelCodegen implements AutoCloseable {
     }
 
     private void generate(File sourceDir, String subDir, Source source, BabelOptions babelOptions,
-                          Set<Path> ancestors) throws IOException, ScriptException {
+                          List<String> excludes, Set<Path> ancestors) throws IOException, ScriptException {
         Path directory = sourceDir.toPath().toRealPath();
         if (!ancestors.add(directory))
             return;
@@ -223,11 +239,11 @@ public class BabelCodegen implements AutoCloseable {
         for (File file : childFiles) {
             final String relativePath = subDir.isEmpty() ? file.getName()
                     : subDir.replace(File.separatorChar, '/') + "/" + file.getName();
-            if (isExcluded(relativePath, source.getExcludes()))
+            if (isExcluded(relativePath, excludes))
                 continue;
             if (file.isDirectory()) {
                 if (source.isRecursive())
-                    generate(file, relativePath.replace('/', File.separatorChar), source, babelOptions, ancestors);
+                    generate(file, relativePath.replace('/', File.separatorChar), source, babelOptions, excludes, ancestors);
                 continue;
             }
 

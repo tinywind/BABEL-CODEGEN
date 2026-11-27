@@ -26,6 +26,8 @@ public class BabelCodegenPluginTest {
         write(project, "input/nested/sample.jsx", "const element = <h2>Nested</h2>;");
         write(project, "input/ignored.jsx", "const broken = ;");
         write(project, "input/nested/ignored.jsx", "const broken = ;");
+        write(project, "input/nested/first,second.jsx", "const broken = ;");
+        write(project, "input/second.jsx", "const included = 1;");
         write(project, "input/vendor/broken.jsx", "const broken = ;");
         write(project, "build.gradle", configuration("REACT", "", false));
         BuildResult result = runner(project, "babelCodegen", "--configuration-cache").build();
@@ -41,6 +43,8 @@ public class BabelCodegenPluginTest {
         assertFalse(Files.exists(project.resolve("output/ignored.js")));
         assertFalse(Files.exists(project.resolve("output/nested/ignored.js")));
         assertFalse(Files.exists(project.resolve("output/vendor")));
+        assertFalse(Files.exists(project.resolve("output/nested/first,second.js")));
+        assertTrue(Files.exists(project.resolve("output/second.js")));
         BuildResult cached = runner(project, "babelCodegen", "--configuration-cache").build();
         assertEquals(TaskOutcome.UP_TO_DATE, cached.task(":babelCodegen").getOutcome());
         assertTrue(cached.getOutput().contains("Configuration cache entry reused"), cached.getOutput());
@@ -140,7 +144,7 @@ public class BabelCodegenPluginTest {
         return "plugins { id 'org.tinywind.babel-codegen' }\n"
                 + "babelCodegen { preset.set('" + preset + "'); minified.set(false); skip.set(" + skip + "); sources { main { "
                 + "sourceDir.set(layout.projectDirectory.dir('input')); targetDir.set(layout.projectDirectory.dir('output')); "
-                + "excludes.set(['**/ignored.jsx', 'vendor/**']); " + sourceOptions + " } } }\n";
+                + "excludes.set(['**/ignored.jsx', 'vendor/**', '**/first,second.jsx']); " + sourceOptions + " } } }\n";
     }
 
     private GradleRunner runner(Path project, String... arguments) {
