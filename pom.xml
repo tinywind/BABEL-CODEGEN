@@ -6,7 +6,7 @@
 
     <groupId>org.tinywind</groupId>
     <artifactId>babel-codegen-parent</artifactId>
-    <version>0.2.2</version>
+    <version>0.2.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>BABEL-CODEGEN Parent</name>
