@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.tinywind</groupId>
         <artifactId>babel-codegen-parent</artifactId>
-        <version>0.2.2</version>
+        <version>0.2.3</version>
     </parent>
 
     <artifactId>babel-codegen</artifactId>
@@ -56,15 +56,6 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>jaxb2-maven-plugin</artifactId>
-                    <version>4.3.0</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -87,11 +78,6 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>*</Export-Package>
-                        <Import-Package>
-                            javax.persistence;resolution:=optional,
-                            org.apache.log4j;resolution:=optional,
-                            *
-                        </Import-Package>
                         <_versionpolicy>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy>
                     </instructions>
                 </configuration>

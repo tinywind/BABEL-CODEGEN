@@ -2,7 +2,7 @@
 
 Compile JavaScript and JSX from Maven or Gradle with Babel 8 embedded in GraalJS. Both plugins run on Java 21 without a Node.js installation.
 
-Version `0.2.2`. The Maven plugin metadata requires Maven 3.10.0. The Gradle plugin supports Java 21 builds on Gradle 8.6 and 9.8.2; Java 25 is tested with Gradle 9.8.2.
+Version `0.2.3`. The Maven plugin metadata requires Maven 3.10.0. The Gradle plugin supports Java 21 builds on Gradle 8.6 and 9.9.2; Java 25 is tested with Gradle 9.9.2.
 
 ## Maven
 
@@ -18,7 +18,7 @@ Add the plugin and generated resource directory to your build:
     <plugin>
       <groupId>org.tinywind</groupId>
       <artifactId>babel-codegen-maven</artifactId>
-      <version>0.2.2</version>
+      <version>0.2.3</version>
       <executions>
         <execution>
           <phase>generate-resources</phase>
@@ -50,7 +50,7 @@ Run `mvn generate-resources` with this configuration, or invoke the goal with `m
 ```groovy
 plugins {
     id 'java'
-    id 'org.tinywind.babel-codegen' version '0.2.2'
+    id 'org.tinywind.babel-codegen' version '0.2.3'
 }
 
 babelCodegen {
@@ -88,19 +88,19 @@ babelCodegen {
 
 ## Options and failure behavior
 
-Each source supports `sourceEncoding` and `targetEncoding` (default `UTF-8`), `sourceFilePostfix` (default `.jsx`), `recursive` (default `true`), and `overwrite` (default `true`). Exclusions use a comma-separated string in Maven and a list of strings in Gradle.
+Each source supports `sourceEncoding` and `targetEncoding` (default `UTF-8`), `sourceFilePostfix` (default `.jsx`), `recursive` (default `true`), and `overwrite` (default `true`). Exclusions use a comma-separated string in Maven and a list of strings in Gradle. A comma inside a Gradle list entry is part of the pattern.
 
-Exclusion patterns are case-sensitive Ant patterns relative to the input root. `**/ignored.jsx` matches root and nested files; `vendor/**` skips that directory before traversing or parsing it. `overwrite=false` preserves existing files and still generates missing files.
+Exclusion patterns are case-sensitive Ant patterns relative to the input root. `**/ignored.jsx` matches root and nested files; `vendor/**` skips that directory before traversing or parsing it. Recursive traversal follows directory links and skips links back to an ancestor. `overwrite=false` preserves existing files and still generates missing files.
 
 `REACT` preserves classic `React.createElement` output. `ES_2015` uses Babel's `env` preset with an IE 11 syntax target and CommonJS modules. Applications provide any required runtime polyfills. `minified` requests compact Babel output.
 
-Invalid configuration, missing input directories, JavaScript syntax errors and output failures fail the build. A syntax error preserves that file's existing output. Other files already generated before a failure remain on disk. The CLI exits nonzero when configuration or generation fails.
+Invalid configuration, missing input directories, JavaScript syntax errors and output failures fail the build. A syntax error preserves that file's existing output. Other files already generated before a failure remain on disk. The CLI reads XML in its declared encoding and rejects DTDs. It exits nonzero when configuration or generation fails.
 
 Since 0.2.1, the project uses Jakarta XML Binding 4. Java callers that marshal the configuration model or implement XML adapters must use `jakarta.xml.bind` imports. Existing XML configuration files and Maven/Gradle options retain their format.
 
 ## Build and verify
 
-Use Java 21. The Maven wrapper downloads the pinned Maven 3.10.0 distribution and checks its SHA-256:
+Use Java 21. The Maven wrapper downloads the pinned Maven 3.10.2 distribution and checks its SHA-256:
 
 ```sh
 ./mvnw -B -ntp install

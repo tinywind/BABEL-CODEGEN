@@ -19,7 +19,9 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 @DisableCachingByDefault(because = "Existing output can be preserved when overwrite is disabled")
 public abstract class BabelCodegenTask extends DefaultTask {
@@ -44,6 +46,7 @@ public abstract class BabelCodegenTask extends DefaultTask {
     @TaskAction
     public void generate() {
         List<Source> sources = new ArrayList<>();
+        Map<Source, List<String>> excludesBySource = new IdentityHashMap<>();
         for (BabelSource input : getSources().get()) {
             Source source = new Source();
             source.setSourceDir(input.getSourceDir().get().getAsFile().getAbsolutePath());
@@ -51,7 +54,7 @@ public abstract class BabelCodegenTask extends DefaultTask {
             source.setSourceEncoding(input.getSourceEncoding().get());
             source.setTargetEncoding(input.getTargetEncoding().get());
             source.setSourceFilePostfix(input.getSourceFilePostfix().get());
-            source.setExcludes(String.join(",", input.getExcludes().get()));
+            excludesBySource.put(source, input.getExcludes().get());
             source.setOverwrite(input.getOverwrite().get());
             source.setRecursive(input.getRecursive().get());
             sources.add(source);
@@ -64,7 +67,7 @@ public abstract class BabelCodegenTask extends DefaultTask {
             options.setPresets(BabelPresets.valueOf(getPreset().get()));
             options.setMinified(getMinified().get());
             configuration.setBabelOptions(options);
-            BabelCodegen.generate(configuration);
+            BabelCodegen.generate(configuration, excludesBySource);
         } catch (ScriptException | IOException | IllegalArgumentException e) {
             throw new GradleException("BABEL-CODEGEN failed: " + e.getMessage(), e);
         }

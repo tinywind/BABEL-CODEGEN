@@ -5,7 +5,8 @@ plugins {
 }
 
 group = 'org.tinywind'
-version = '0.2.2'
+def parentPom = providers.fileContents(layout.projectDirectory.file('../pom.xml')).asText.get()
+version = new groovy.xml.XmlSlurper().parseText(parentPom).version.text()
 
 java {
     toolchain {
@@ -21,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.tinywind:babel-codegen:0.2.2'
+    implementation "org.tinywind:babel-codegen:${project.version}"
     testImplementation platform('org.junit:junit-bom:6.1.3')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
