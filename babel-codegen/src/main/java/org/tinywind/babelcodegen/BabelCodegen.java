@@ -225,12 +225,13 @@ public class BabelCodegen implements AutoCloseable {
 
     private void generate(File sourceDir, String subDir, Source source, BabelOptions babelOptions,
                           List<String> excludes, Set<Path> ancestors) throws IOException, ScriptException {
-        Path directory = sourceDir.toPath().toRealPath();
-        if (!ancestors.add(directory))
-            return;
         final File[] childFiles = sourceDir.listFiles();
         if (childFiles == null)
             throw new IOException("Cannot read source directory: " + sourceDir.getAbsolutePath());
+
+        Path directory = sourceDir.toPath().toRealPath();
+        if (!ancestors.add(directory))
+            return;
 
         final File targetDir = new File(source.getTargetDir(), subDir).getAbsoluteFile();
         if (!targetDir.mkdirs() && !targetDir.isDirectory())
