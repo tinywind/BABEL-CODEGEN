@@ -268,6 +268,26 @@ public class BabelCodegenTest {
     }
 
     @Test
+    public void concurrentGenerationsKeepTheirOwnCompilerContext() throws Exception {
+        Path input = Files.createDirectory(temporary.resolve("input"));
+        Files.writeString(input.resolve("sample.jsx"), "const label = value => value;");
+        Path react = temporary.resolve("react");
+        Path es2015 = temporary.resolve("es2015");
+        try (var workers = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+            var untranspiled = workers.submit(() -> {
+                BabelCodegen.generate(configuration(input, react, BabelPresets.REACT, true, true, false));
+                return Files.readString(react.resolve("sample.js"));
+            });
+            var transpiled = workers.submit(() -> {
+                BabelCodegen.generate(configuration(input, es2015, BabelPresets.ES_2015, true, true, false));
+                return Files.readString(es2015.resolve("sample.js"));
+            });
+            assertTrue(untranspiled.get().contains("=>"));
+            assertFalse(transpiled.get().contains("=>"));
+        }
+    }
+
+    @Test
     public void appliesSchemaDefaultsToExplicitNulls() throws Exception {
         Path nested = Files.createDirectory(temporary.resolve("nested"));
         Files.writeString(nested.resolve("sample.jsx"), "const node = <p>한글</p>;");

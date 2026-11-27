@@ -27,11 +27,13 @@ import org.tinywind.babelcodegen.jaxb.*;
 import org.codehaus.plexus.util.SelectorUtils;
 
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
 import javax.script.ScriptException;
 import java.io.*;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -45,18 +47,30 @@ public class BabelCodegen implements AutoCloseable {
     public final static String BABEL_CODEGEN_XSD = "babel-codegen-0.1.xsd";
     public final static String REPO_XSD_URL = "https://raw.githubusercontent.com/tinywind/BABEL-CODEGEN/master/babel-codegen/src/main/resources/xsd/";
     public final static String REPO_BABEL_CODEGEN_XSD = REPO_XSD_URL + BABEL_CODEGEN_XSD;
+    private static final class CompilerRuntime {
+        static final Engine ENGINE = Engine.newBuilder("js").option("engine.WarnInterpreterOnly", "false").build();
+        private static org.graalvm.polyglot.Source script;
+
+        static synchronized org.graalvm.polyglot.Source script() throws IOException {
+            if (script == null) {
+                URL resource = BabelCodegen.class.getResource("/asset/babel.min.js");
+                if (resource == null)
+                    throw new IOException("Missing embedded compiler: asset/babel.min.js");
+                script = org.graalvm.polyglot.Source.newBuilder("js", resource).name("babel.min.js")
+                        .encoding(java.nio.charset.StandardCharsets.UTF_8).build();
+            }
+            return script;
+        }
+    }
+
     private final Context engine;
     private final Value transform;
 
     public BabelCodegen() throws ScriptException, IOException {
-        engine = Context.newBuilder("js").allowHostAccess(HostAccess.NONE)
-                .allowHostClassLookup(name -> false).option("engine.WarnInterpreterOnly", "false").build();
-        try (InputStream in = getClass().getClassLoader().getResourceAsStream("asset/babel.min.js")) {
-            if (in == null)
-                throw new IOException("Missing embedded compiler: asset/babel.min.js");
-            try (InputStreamReader reader = new InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8)) {
-                engine.eval(org.graalvm.polyglot.Source.newBuilder("js", reader, "babel.min.js").build());
-            }
+        engine = Context.newBuilder("js").engine(CompilerRuntime.ENGINE).allowHostAccess(HostAccess.NONE)
+                .allowHostClassLookup(name -> false).build();
+        try {
+            engine.eval(CompilerRuntime.script());
             transform = engine.eval("js", "(input, filename, preset, minified) => Babel.transform(input, {"
                     + "filename, presets: preset === 'react' ? [['react', { runtime: 'classic' }]]"
                     + " : [['env', { targets: { ie: '11' }, modules: 'commonjs', ignoreBrowserslistConfig: true }]],"
