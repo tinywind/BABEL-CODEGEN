@@ -18,6 +18,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import org.xml.sax.SAXException;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -264,6 +265,52 @@ public class BabelCodegenTest {
         schema.newValidator().validate(new StreamSource(new StringReader(valid)));
         assertThrows(SAXException.class, () -> schema.newValidator()
                 .validate(new StreamSource(new StringReader(prefix + "</configuration>"))));
+    }
+
+    @Test
+    public void appliesSchemaDefaultsToExplicitNulls() throws Exception {
+        Path nested = Files.createDirectory(temporary.resolve("nested"));
+        Files.writeString(nested.resolve("sample.jsx"), "const node = <p>한글</p>;");
+        Files.writeString(nested.resolve("sample.js"), "old");
+        Source source = new Source().withSourceDir("  " + temporary + "  ").withTargetDir(null)
+                .withSourceEncoding(null).withTargetEncoding(null).withSourceFilePostfix(null)
+                .withRecursive(null).withOverwrite(null).withExcludes(null);
+        BabelOptions options = new BabelOptions().withPresets(null).withMinified(null);
+        BabelCodegen.generate(new Configuration().withSources(source).withBabelOptions(options));
+        assertTrue(Files.readString(nested.resolve("sample.js")).contains("React.createElement"));
+        assertEquals("", source.getExcludes());
+        assertEquals(BabelPresets.REACT, options.getPresets());
+        assertEquals(Boolean.FALSE, options.isMinified());
+    }
+
+    @Test
+    public void readsUnqualifiedAndLegacyPrefixedXmlInItsDeclaredEncoding() throws Exception {
+        for (String prefix : List.of("", "old:")) {
+            String binding = prefix.isEmpty() ? "" : " xmlns:old='urn:legacy'";
+            String xml = "<?xml version='1.0' encoding='UTF-16'?>"
+                    + "<Pconfiguration" + binding + "><Psources><Psources><PsourceDir>한글</PsourceDir>"
+                    + "</Psources></Psources></Pconfiguration>";
+            xml = xml.replace("<P", "<" + prefix).replace("</P", "</" + prefix);
+            Configuration loaded = ConfigurationXml.load(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_16)));
+            assertEquals("한글", loaded.getSources().get(0).getSourceDir());
+        }
+    }
+
+    @Test
+    public void rejectsDoctypeEvenWithoutEntities() {
+        String xml = "<!DOCTYPE configuration><configuration><sources><sources><sourceDir>input</sourceDir>"
+                + "</sources></sources></configuration>";
+        assertThrows(IOException.class, () -> ConfigurationXml.load(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8))));
+    }
+
+    @Test
+    public void validatesRootAttributesAndNestedNamespaces() {
+        String xml = "<configuration xmlns='urn:legacy'><sources><sources><sourceDir>input</sourceDir>"
+                + "</sources></sources></configuration>";
+        for (String invalid : List.of(xml.replace("xmlns=", "unexpected='1' xmlns="),
+                xml.replace("<sourceDir>", "<sourceDir xmlns='urn:foreign'>"))) {
+            assertThrows(IOException.class, () -> ConfigurationXml.load(new ByteArrayInputStream(invalid.getBytes(StandardCharsets.UTF_8))));
+        }
     }
 
     private Configuration configuration(Path input, Path output, BabelPresets preset,

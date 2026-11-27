@@ -31,15 +31,9 @@ import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
 import javax.script.ScriptException;
-import javax.xml.XMLConstants;
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Unmarshaller;
-import jakarta.xml.bind.annotation.XmlElement;
-import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Locale;
 
 import static java.lang.System.exit;
@@ -95,45 +89,33 @@ public class BabelCodegen implements AutoCloseable {
         return true;
     }
 
-    private static void setDefault(Configuration configuration) throws NoSuchFieldException {
-        if (configuration.getSources() == null)
-            configuration.setSources(new ArrayList<>());
+    private static String trimmedOrDefault(String value, String fallback) {
+        return value == null ? fallback : value.trim();
+    }
 
+    private static void setDefault(Configuration configuration) {
+        Source defaults = new Source();
         for (Source source : configuration.getSources()) {
-            final String sourceDir = source.getSourceDir();
-            source.setSourceDir(sourceDir == null ? Source.class.getField("sourceDir").getAnnotation(XmlElement.class).defaultValue() : sourceDir.trim());
-
-            final String targetDir = source.getTargetDir();
-            source.setTargetDir(targetDir == null ? source.getSourceDir() : targetDir.trim());
-
-            final String sourceEncoding = source.getSourceEncoding();
-            source.setSourceEncoding(sourceEncoding == null ? Source.class.getField("sourceEncoding").getAnnotation(XmlElement.class).defaultValue() : sourceEncoding.trim());
-
-            final String targetEncoding = source.getTargetEncoding();
-            source.setTargetEncoding(targetEncoding == null ? Source.class.getField("targetEncoding").getAnnotation(XmlElement.class).defaultValue() : targetEncoding.trim());
-
-            final String filePostfix = source.getSourceFilePostfix();
-            source.setSourceFilePostfix(filePostfix == null ? Source.class.getField("sourceFilePostfix").getAnnotation(XmlElement.class).defaultValue() : filePostfix.trim());
-
-            final String excludes = source.getExcludes();
-            source.setExcludes(excludes == null ? Source.class.getField("excludes").getAnnotation(XmlElement.class).defaultValue() : excludes.trim());
-
-            final Boolean overwrite = source.isOverwrite();
-            source.setOverwrite(overwrite == null ? Boolean.valueOf(Source.class.getField("overwrite").getAnnotation(XmlElement.class).defaultValue()) : overwrite);
-
-            final Boolean recursive = source.isRecursive();
-            source.setRecursive(recursive == null ? Boolean.valueOf(Source.class.getField("recursive").getAnnotation(XmlElement.class).defaultValue()) : recursive);
+            source.setSourceDir(source.getSourceDir().trim());
+            source.setTargetDir(trimmedOrDefault(source.getTargetDir(), source.getSourceDir()));
+            source.setSourceEncoding(trimmedOrDefault(source.getSourceEncoding(), defaults.getSourceEncoding()));
+            source.setTargetEncoding(trimmedOrDefault(source.getTargetEncoding(), defaults.getTargetEncoding()));
+            source.setSourceFilePostfix(trimmedOrDefault(source.getSourceFilePostfix(), defaults.getSourceFilePostfix()));
+            source.setExcludes(trimmedOrDefault(source.getExcludes(), defaults.getExcludes()));
+            if (source.isOverwrite() == null)
+                source.setOverwrite(defaults.isOverwrite());
+            if (source.isRecursive() == null)
+                source.setRecursive(defaults.isRecursive());
         }
 
+        BabelOptions optionDefaults = new BabelOptions();
         if (configuration.getBabelOptions() == null)
-            configuration.setBabelOptions(new BabelOptions());
-        final BabelOptions babelOptions = configuration.getBabelOptions();
-
-        final BabelPresets presets = babelOptions.getPresets();
-        babelOptions.setPresets(presets == null ? BabelPresets.valueOf(BabelOptions.class.getField("presets").getAnnotation(XmlElement.class).defaultValue()) : presets);
-
-        final Boolean minified = babelOptions.isMinified();
-        babelOptions.setMinified(minified == null ? Boolean.valueOf(BabelOptions.class.getField("minified").getAnnotation(XmlElement.class).defaultValue()) : minified);
+            configuration.setBabelOptions(optionDefaults);
+        BabelOptions options = configuration.getBabelOptions();
+        if (options.getPresets() == null)
+            options.setPresets(optionDefaults.getPresets());
+        if (options.isMinified() == null)
+            options.setMinified(optionDefaults.isMinified());
     }
 
     public static void main(String[] args) {
@@ -164,7 +146,7 @@ public class BabelCodegen implements AutoCloseable {
 
                 System.out.println("Initialising properties: " + arg);
 
-                final Configuration configuration = load(in);
+                final Configuration configuration = ConfigurationXml.load(in);
                 generate(configuration);
             } catch (Exception e) {
                 failed = true;
@@ -184,41 +166,10 @@ public class BabelCodegen implements AutoCloseable {
         System.out.println("complete transform JSX -> JS");
     }
 
-    private static Configuration load(InputStream in) throws IOException {
-        final byte[] buffer = new byte[1000 * 1000];
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for (int len; (len = in.read(buffer)) >= 0; )
-            out.write(buffer, 0, len);
-
-        final String xml = out.toString()
-                .replaceAll("<(\\w+:)?configuration\\s+xmlns(:\\w+)?=\"[^\"]*\"[^>]*>", "<$1configuration xmlns$2=\"" + REPO_BABEL_CODEGEN_XSD + "\">")
-                .replace("<configuration>", "<configuration xmlns=\"" + REPO_BABEL_CODEGEN_XSD + "\">");
-        try {
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            final JAXBContext ctx = JAXBContext.newInstance(Configuration.class);
-            final Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            unmarshaller.setSchema(sf.newSchema(BabelCodegen.class.getResource("/xsd/" + BABEL_CODEGEN_XSD)));
-            unmarshaller.setEventHandler(event -> false);
-            return (Configuration) unmarshaller.unmarshal(new StringReader(xml));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static void generate(Configuration configuration) throws ScriptException, IOException {
         if (!isCorrected(configuration))
             throw new IllegalArgumentException("Configuration must contain at least one nonblank source directory");
-        try {
-            setDefault(configuration);
-        } catch (NoSuchFieldException e) {
-            throw new IllegalStateException("Cannot apply configuration defaults", e);
-        }
+        setDefault(configuration);
 
         try (BabelCodegen codegen = new BabelCodegen()) {
             for (Source source : configuration.getSources())
