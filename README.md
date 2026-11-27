@@ -88,13 +88,13 @@ babelCodegen {
 
 ## Options and failure behavior
 
-Each source supports `sourceEncoding` and `targetEncoding` (default `UTF-8`), `sourceFilePostfix` (default `.jsx`), `recursive` (default `true`), and `overwrite` (default `true`). Exclusions use a comma-separated string in Maven and a list of strings in Gradle.
+Each source supports `sourceEncoding` and `targetEncoding` (default `UTF-8`), `sourceFilePostfix` (default `.jsx`), `recursive` (default `true`), and `overwrite` (default `true`). Exclusions use a comma-separated string in Maven and a list of strings in Gradle. A comma inside a Gradle list entry is part of the pattern.
 
-Exclusion patterns are case-sensitive Ant patterns relative to the input root. `**/ignored.jsx` matches root and nested files; `vendor/**` skips that directory before traversing or parsing it. `overwrite=false` preserves existing files and still generates missing files.
+Exclusion patterns are case-sensitive Ant patterns relative to the input root. `**/ignored.jsx` matches root and nested files; `vendor/**` skips that directory before traversing or parsing it. Recursive traversal follows directory links and skips links back to an ancestor. `overwrite=false` preserves existing files and still generates missing files.
 
 `REACT` preserves classic `React.createElement` output. `ES_2015` uses Babel's `env` preset with an IE 11 syntax target and CommonJS modules. Applications provide any required runtime polyfills. `minified` requests compact Babel output.
 
-Invalid configuration, missing input directories, JavaScript syntax errors and output failures fail the build. A syntax error preserves that file's existing output. Other files already generated before a failure remain on disk. The CLI exits nonzero when configuration or generation fails.
+Invalid configuration, missing input directories, JavaScript syntax errors and output failures fail the build. A syntax error preserves that file's existing output. Other files already generated before a failure remain on disk. The CLI reads XML in its declared encoding and rejects DTDs. It exits nonzero when configuration or generation fails.
 
 Since 0.2.1, the project uses Jakarta XML Binding 4. Java callers that marshal the configuration model or implement XML adapters must use `jakarta.xml.bind` imports. Existing XML configuration files and Maven/Gradle options retain their format.
 
