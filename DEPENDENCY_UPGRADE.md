@@ -1,6 +1,6 @@
 # Runtime and plugin compatibility
 
-Version 0.2.2 requires Java 21. The Maven coordinates `org.tinywind:babel-codegen` and `org.tinywind:babel-codegen-maven`, Maven goal `generate`, goal prefix `babel-codegen`, existing configuration XML namespace, JAXB fluent API, and `REACT`/`ES_2015` values remain available.
+Version 0.2.3 requires Java 21. The Maven coordinates `org.tinywind:babel-codegen` and `org.tinywind:babel-codegen-maven`, Maven goal `generate`, goal prefix `babel-codegen`, existing configuration XML namespace, JAXB fluent API, and `REACT`/`ES_2015` values remain available.
 
 ## Compiler runtime
 
@@ -16,7 +16,7 @@ Jakarta XML Binding API 4.0.5 and runtime 4.0.9 replace JAXB 2.3. The configurat
 
 JAXB Tools 4.0.16 supplies the source generator, element-wrapper, setter, fluent, default-value and annotation plugins. These maintained plugins replace the legacy XEW and JAXB2 Commons artifacts. Collection setters use direct assignment after wrapper transformation to retain `setSources(List<Source>)`; annotation bindings target retained types. Binding documents use the Jakarta 3.0 binding namespace and current Annox namespace. The application configuration namespace is unchanged.
 
-Maven API/core 3.10.0 dependencies are provided by Maven and are not transitive application runtime dependencies. The plugin POM and generated descriptor declare Maven 3.10.0; Java 21 remains the runtime floor. Maven 4 release candidates are excluded from stable-version upgrades.
+Maven API/core 3.10.2 dependencies are provided by Maven and are not transitive application runtime dependencies. The plugin POM and generated descriptor declare Maven 3.10.0; Java 21 remains the runtime floor. Maven 4 release candidates are excluded from stable-version upgrades.
 
 ## Failures and exclusions
 
@@ -26,16 +26,16 @@ Exclusions are case-sensitive Ant patterns, relative to each input root. Comma-s
 
 ## Gradle plugin
 
-Plugin ID: `org.tinywind.babel-codegen`, version `0.2.2`. Implementation artifact: `org.tinywind:babel-codegen-gradle-plugin:0.2.2`.
+Plugin ID: `org.tinywind.babel-codegen`, version `0.2.3`. Implementation artifact: `org.tinywind:babel-codegen-gradle-plugin:0.2.3`.
 
 The native Java Gradle project shares the Maven-built compiler. The `babelCodegen` extension and task use Gradle properties and named sources. Inputs and output directories participate in up-to-date checks, and the task supports configuration-cache reuse. Build caching is disabled by default because preserving existing output with `overwrite=false` makes that output depend on its prior contents.
 
-The Gradle wrapper pins distribution 9.8.2 and its SHA-256. There is no external Kotlin Gradle plugin dependency. Gradle 8.6 consumers use Java 21; Java 25 consumers use Gradle 9.8.2. Upstream libraries can emit native-access and Unsafe deprecation warnings on Java 25.
+The Gradle wrapper pins distribution 9.9.2 and its SHA-256. There is no external Kotlin Gradle plugin dependency. Gradle 8.6 consumers use Java 21; Java 25 consumers use Gradle 9.9.2. Upstream libraries can emit native-access and Unsafe deprecation warnings on Java 25.
 
 ## Verification and publication
 
 Tests use JUnit Jupiter 6.1.3 with `@TempDir`; Maven and Gradle both execute the current JUnit Platform. Tests cover JSX and executable ES2015 output, UTF-8 text, XML contracts, recursive/overwrite/exclusion behavior, failures and CLI exit codes. Maven Invoker tests run real consumers through generation and resource packaging and verify negative builds and skip. Gradle TestKit covers both DSLs, generated resources in a JAR, configuration-cache reuse, multiple sources, recursion, overwrite, exclusions and failure handling.
 
-The Maven wrapper pins Maven 3.10.0 with a SHA-256 check; CI uses this wrapper instead of the runner's preinstalled Maven. GitHub CI verifies Java 21 and 25. CodeQL builds both Java adapters and the shared compiler; intentionally invalid JavaScript fixture inputs are excluded from JavaScript extraction.
+The Maven wrapper pins Maven 3.10.2 with a SHA-256 check; CI uses this wrapper instead of the runner's preinstalled Maven. GitHub CI verifies Java 21 and 25. CodeQL builds both Java adapters and the shared compiler; intentionally invalid JavaScript fixture inputs are excluded from JavaScript extraction.
 
 Maven Central publication uses signed parent/compiler/Maven plugin artifacts. The release profile uses the Central Publishing plugin with server ID `central`; it replaces the retired OSSRH endpoints. The Gradle project publishes through the Gradle Plugin Portal. Publishing credentials stay outside the repository.
